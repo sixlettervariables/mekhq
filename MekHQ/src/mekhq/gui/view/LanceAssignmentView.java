@@ -48,13 +48,13 @@ import javax.swing.table.TableRowSorter;
 
 import mekhq.campaign.Campaign;
 import mekhq.campaign.force.Force;
-import mekhq.campaign.force.Lance;
 import mekhq.campaign.mission.AtBContract;
 import mekhq.campaign.mission.Mission;
 import mekhq.campaign.personnel.SkillType;
 import mekhq.gui.model.DataTableModel;
 import mekhq.gui.model.UnitMarketTableModel;
 import mekhq.gui.model.XTableColumnModel;
+import mekhq.module.atb.Lance;
 
 /**
  * Against the Bot
@@ -244,13 +244,13 @@ public class LanceAssignmentView extends JPanel {
 		if (activeContracts.size() > 0) {
 			defaultContract = activeContracts.get(0);
 		}
-		for (Lance l : campaign.getLances().values()) {
+		for (Lance l : campaign.getAtB().getLances().values()) {
 			if (null == l.getContract(campaign) || !l.getContract(campaign).isActive()) {
 				l.setContract(defaultContract);
 			}
 		}
 		((DataTableModel)tblRequiredLances.getModel()).setData(activeContracts);
-		((DataTableModel)tblAssignments.getModel()).setData(campaign.getLanceList());
+		((DataTableModel)tblAssignments.getModel()).setData(new ArrayList<Lance>(campaign.getAtB().getLanceList()));
 		panRequiredLances.setVisible(tblRequiredLances.getRowCount() > 0);
 	}
 	
@@ -376,7 +376,7 @@ class RequiredLancesTableModel extends DataTableModel {
 			AtBContract contract = (AtBContract)data.get(row);
 			if (column == COL_TOTAL) {
 				int t = 0;
-				for (Lance l : campaign.getLanceList()) {
+				for (Lance l : campaign.getAtB().getLanceList()) {
 					if (l.getContract(campaign) == data.get(row)
 							&& l.getRole() > Lance.ROLE_UNASSIGNED
 							&& l.isEligible(campaign)) {
@@ -389,7 +389,7 @@ class RequiredLancesTableModel extends DataTableModel {
 				return Integer.toString(contract.getRequiredLances());
 			} else if (contract.getRequiredLanceType() == column - 1) {
 				int t = 0;
-				for (Lance l : campaign.getLanceList()) {
+				for (Lance l : campaign.getAtB().getLanceList()) {
 					if (l.getContract(campaign) == data.get(row)
 							&& l.getRole() == l.getContract(campaign).getRequiredLanceType()
 							&& l.isEligible(campaign)) {

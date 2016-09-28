@@ -972,7 +972,7 @@ public class ResolveScenarioTracker {
                 campaign.changeStatus(person, Person.S_KIA);
                 if (campaign.getCampaignOptions().getUseAtB() &&
                         m instanceof AtBContract) {
-                    campaign.getRetirementDefectionTracker().removeFromCampaign(person,
+                    campaign.getAtB().getRetirementDefectionTracker().removeFromCampaign(person,
                             true, campaign.getCampaignOptions().getUseShareSystem()?person.getNumShares(campaign.getCampaignOptions().getSharesForAll()):0,
                                     campaign, (AtBContract)m);
                 }
@@ -1026,7 +1026,7 @@ public class ResolveScenarioTracker {
                 campaign.changeStatus(person, Person.S_KIA);
                 if (campaign.getCampaignOptions().getUseAtB() &&
                         m instanceof AtBContract) {
-                    campaign.getRetirementDefectionTracker().removeFromCampaign(person,
+                    campaign.getAtB().getRetirementDefectionTracker().removeFromCampaign(person,
                             true, campaign.getCampaignOptions().getUseShareSystem()?person.getNumShares(campaign.getCampaignOptions().getSharesForAll()):0,
                                     campaign, (AtBContract)m);
                 }

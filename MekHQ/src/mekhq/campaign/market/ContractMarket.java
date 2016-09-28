@@ -215,7 +215,7 @@ public class ContractMarket implements Serializable {
 			}
 
 			if (campaign.getFactionCode().equals("MERC") || campaign.getFactionCode().equals("PIR")) {
-				if (campaign.getAtBConfig().isHiringHall(campaign.getCurrentPlanet().getId(), campaign.getDate())) {
+				if (campaign.getAtB().getAtBData().isHiringHall(campaign.getCurrentPlanet().getId(), campaign.getDate())) {
 					numContracts++;
 					/* Though the rules do not state these modifiers are mutually exclusive, the fact that the
 					 * distance of Galatea from a border means that it has no advantage for Mercs over border

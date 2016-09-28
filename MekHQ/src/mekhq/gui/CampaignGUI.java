@@ -151,7 +151,6 @@ import mekhq.campaign.JumpPath;
 import mekhq.campaign.RandomSkillPreferences;
 import mekhq.campaign.ResolveScenarioTracker;
 import mekhq.campaign.force.Force;
-import mekhq.campaign.force.Lance;
 import mekhq.campaign.mission.AtBContract;
 import mekhq.campaign.mission.AtBScenario;
 import mekhq.campaign.mission.Contract;
@@ -272,6 +271,7 @@ import mekhq.gui.view.PersonViewPanel;
 import mekhq.gui.view.PlanetViewPanel;
 import mekhq.gui.view.ScenarioViewPanel;
 import mekhq.gui.view.UnitViewPanel;
+import mekhq.module.atb.Lance;
 
 /**
  * The application's main frame.
@@ -597,11 +597,11 @@ public class CampaignGUI extends JPanel {
          * custom schedule
          */
         RetirementDefectionDialog rdd = new RetirementDefectionDialog(this,
-                null, getCampaign().getRetirementDefectionTracker()
+                null, getCampaign().getAtB().getRetirementDefectionTracker()
                         .getRetirees().size() == 0);
         rdd.setVisible(true);
         if (!rdd.wasAborted()) {
-            getCampaign().applyRetirement(rdd.totalPayout(),
+            getCampaign().getAtB().applyRetirement(rdd.totalPayout(),
                     rdd.getUnitAssignments());
         }
         refreshReport();
@@ -3484,13 +3484,13 @@ public class CampaignGUI extends JPanel {
                                      * without reference to the contract and the
                                      * dialog can be accessed through the menu.
                                      */
-                                    if (!getCampaign()
+                                    if (!getCampaign().getAtB()
                                             .getRetirementDefectionTracker()
                                             .isOutstanding(mission.getId())) {
                                         mission.setStatus(Mission.S_ACTIVE);
                                     }
                                 } else {
-                                    if (null != getCampaign()
+                                    if (null != getCampaign().getAtB()
                                             .getRetirementDefectionTracker()
                                             .getRetirees((AtBContract) mission)
                                             && getCampaign().getFinances()
@@ -3509,7 +3509,7 @@ public class CampaignGUI extends JPanel {
                                             }
                                         }
                                     }
-                                    if (!getCampaign().applyRetirement(
+                                    if (!getCampaign().getAtB().applyRetirement(
                                             rdd.totalPayout(),
                                             rdd.getUnitAssignments())) {
                                         mission.setStatus(Mission.S_ACTIVE);
@@ -3804,7 +3804,7 @@ public class CampaignGUI extends JPanel {
             }
             String report = acquisition.find(0);
             if (report.endsWith("0 days.")) {
-                AtBContract contract = getCampaign().getAttachedAtBContract(
+                AtBContract contract = getCampaign().getAtB().getAttachedAtBContract(
                         getSelectedAcquisition().getUnit());
                 if (null == contract) {
                     for (Mission m : getCampaign().getMissions()) {
@@ -4088,11 +4088,11 @@ public class CampaignGUI extends JPanel {
             refreshReport();
             return;
         }
-        if (getCampaign().checkRetirementDefections()) {
+        if (getCampaign().getAtB().checkRetirementDefections()) {
             showRetirementDefectionDialog();
             return;
         }
-        if (getCampaign().checkYearlyRetirements()) {
+        if (getCampaign().getAtB().checkYearlyRetirements()) {
             showRetirementDefectionDialog();
             return;
         }
@@ -4188,7 +4188,7 @@ public class CampaignGUI extends JPanel {
                     || !getCampaign().getLocation().isOnPlanet()) {
                 continue;
             }
-            if (getCampaign().getDeploymentDeficit((AtBContract) m) > 0) {
+            if (getCampaign().getAtB().getDeploymentDeficit((AtBContract) m) > 0) {
                 return 0 != JOptionPane
                         .showConfirmDialog(
                                 null,
@@ -6092,14 +6092,14 @@ public class CampaignGUI extends JPanel {
         resolveDialog.setVisible(true);
         if (getCampaign().getCampaignOptions().getUseAtB()
                 && getCampaign().getMission(scenario.getMissionId()) instanceof AtBContract
-                && getCampaign().getRetirementDefectionTracker().getRetirees()
+                && getCampaign().getAtB().getRetirementDefectionTracker().getRetirees()
                         .size() > 0) {
             RetirementDefectionDialog rdd = new RetirementDefectionDialog(
                     getCampaignGUI(), (AtBContract) getCampaign().getMission(
                             scenario.getMissionId()), false);
             rdd.setVisible(true);
             if (!rdd.wasAborted()) {
-                getCampaign().applyRetirement(rdd.totalPayout(),
+                getCampaign().getAtB().applyRetirement(rdd.totalPayout(),
                         rdd.getUnitAssignments());
             }
         }
@@ -6930,7 +6930,7 @@ public class CampaignGUI extends JPanel {
         if (getCampaign().getCampaignOptions().getUseAtB()) {
             int numBonusParts = 0;
             if (acquireSelected() && null != getSelectedAcquisition()) {
-                AtBContract contract = getCampaign().getAttachedAtBContract(
+                AtBContract contract = getCampaign().getAtB().getAttachedAtBContract(
                         getSelectedAcquisition().getUnit());
                 if (null == contract) {
                     numBonusParts = getCampaign().totalBonusParts();

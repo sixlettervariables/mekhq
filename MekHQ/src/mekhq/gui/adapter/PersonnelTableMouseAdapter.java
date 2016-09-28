@@ -636,7 +636,7 @@ public class PersonnelTableMouseAdapter extends MouseInputAdapter implements
                 boolean showDialog = false;
                 ArrayList<UUID> toRemove = new ArrayList<UUID>();
                 for (Person person : people) {
-                    if (gui.getCampaign().getRetirementDefectionTracker()
+                    if (gui.getCampaign().getAtB().getRetirementDefectionTracker()
                             .removeFromCampaign(
                                     person,
                                     false,
@@ -656,10 +656,10 @@ public class PersonnelTableMouseAdapter extends MouseInputAdapter implements
                             gui, null, false);
                     rdd.setVisible(true);
                     if (rdd.wasAborted()
-                            || !gui.getCampaign().applyRetirement(rdd.totalPayout(),
+                            || !gui.getCampaign().getAtB().applyRetirement(rdd.totalPayout(),
                                     rdd.getUnitAssignments())) {
                         for (Person person : people) {
-                            gui.getCampaign().getRetirementDefectionTracker()
+                            gui.getCampaign().getAtB().getRetirementDefectionTracker()
                                     .removePayout(person);
                         }
                     } else {

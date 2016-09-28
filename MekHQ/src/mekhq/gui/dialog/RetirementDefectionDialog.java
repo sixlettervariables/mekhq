@@ -56,7 +56,6 @@ import megamek.common.util.EncodeControl;
 import mekhq.Utilities;
 import mekhq.campaign.mission.AtBContract;
 import mekhq.campaign.personnel.Person;
-import mekhq.campaign.personnel.RetirementDefectionTracker;
 import mekhq.campaign.unit.Unit;
 import mekhq.gui.CampaignGUI;
 import mekhq.gui.model.PersonnelTableModel;
@@ -67,6 +66,7 @@ import mekhq.gui.sorter.BonusSorter;
 import mekhq.gui.sorter.FormattedNumberSorter;
 import mekhq.gui.sorter.RankSorter;
 import mekhq.gui.sorter.WeightClassSorter;
+import mekhq.module.atb.RetirementDefectionTracker;
 
 /**
  * @author Neoancient
@@ -129,7 +129,7 @@ public class RetirementDefectionDialog extends JDialog {
 		hqView = gui;
 		unitAssignments = new HashMap<UUID, UUID>();
 		this.contract = contract;
-		rdTracker = hqView.getCampaign().getRetirementDefectionTracker();
+		rdTracker = hqView.getCampaign().getAtB().getRetirementDefectionTracker();
 		if (doRetirement) {
 			targetRolls = rdTracker.calculateTargetNumbers(contract,
 					hqView.getCampaign());
@@ -600,9 +600,9 @@ public class RetirementDefectionDialog extends JDialog {
 		boolean showRecruitColumn = false;
 		for (UUID pid : rdTracker.getRetirees(contract)) {
 			retireeList.add(pid);
-			if (hqView.getCampaign().getRetirementDefectionTracker().getPayout(pid).getDependents() > 0 ||
-					hqView.getCampaign().getRetirementDefectionTracker().getPayout(pid).hasHeir() ||
-					hqView.getCampaign().getRetirementDefectionTracker().getPayout(pid).hasRecruit()) {
+			if (hqView.getCampaign().getAtB().getRetirementDefectionTracker().getPayout(pid).getDependents() > 0 ||
+					hqView.getCampaign().getAtB().getRetirementDefectionTracker().getPayout(pid).hasHeir() ||
+					hqView.getCampaign().getAtB().getRetirementDefectionTracker().getPayout(pid).hasRecruit()) {
 				showRecruitColumn = true;
 			}
 		}

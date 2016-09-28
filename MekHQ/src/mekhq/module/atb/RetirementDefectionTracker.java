@@ -19,7 +19,7 @@
  * along with MekHQ.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package mekhq.campaign.personnel;
+package mekhq.module.atb;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -46,6 +46,10 @@ import mekhq.Utilities;
 import mekhq.campaign.Campaign;
 import mekhq.campaign.mission.AtBContract;
 import mekhq.campaign.mission.Mission;
+import mekhq.campaign.personnel.Injury;
+import mekhq.campaign.personnel.Person;
+import mekhq.campaign.personnel.Ranks;
+import mekhq.campaign.personnel.SkillType;
 
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -202,8 +206,8 @@ public class RetirementDefectionTracker implements Serializable, MekHqXmlSeriali
     			target.addModifier(1, "Failed mission");
     		}
     		if (campaign.getCampaignOptions().getTrackUnitFatigue()
-    				&& campaign.getFatigueLevel() >= 10) {
-    			target.addModifier(campaign.getFatigueLevel() / 10, "Fatigue");
+    				&& campaign.getAtB().getFatigueLevel() >= 10) {
+    			target.addModifier(campaign.getAtB().getFatigueLevel() / 10, "Fatigue");
     		}
     		if (campaign.getFactionCode().equals("PIR")) {
     			target.addModifier(1, "Pirate");

@@ -77,8 +77,8 @@ public class AdvanceDaysDialog extends JDialog implements ActionListener {
                         && (gui.nagShortDeployments() || gui.nagOutstandingScenarios())) {
                     break;
                 }
-                if (gui.getCampaign().checkRetirementDefections()
-                        || gui.getCampaign().checkYearlyRetirements()) {
+                if (gui.getCampaign().getAtB().checkRetirementDefections()
+                        || gui.getCampaign().getAtB().checkYearlyRetirements()) {
                     gui.showRetirementDefectionDialog();
                     break;
                 }

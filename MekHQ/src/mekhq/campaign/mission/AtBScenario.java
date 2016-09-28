@@ -62,7 +62,6 @@ import mekhq.MekHqXmlUtil;
 import mekhq.Utilities;
 import mekhq.campaign.Campaign;
 import mekhq.campaign.force.Force;
-import mekhq.campaign.force.Lance;
 import mekhq.campaign.market.UnitMarket;
 import mekhq.campaign.parts.Part;
 import mekhq.campaign.parts.equipment.EquipmentPart;
@@ -73,6 +72,7 @@ import mekhq.campaign.unit.Unit;
 import mekhq.campaign.universe.Faction;
 import mekhq.campaign.universe.Planet;
 import mekhq.campaign.universe.Planets;
+import mekhq.module.atb.Lance;
 
 /**
  * @author Neoancient
@@ -2713,7 +2713,7 @@ public class AtBScenario extends Scenario {
 	}
 
 	public Lance getLance(Campaign c) {
-		return c.getLances().get(lanceForceId);
+		return c.getAtB().getLances().get(lanceForceId);
 	}
 
 	public void setLance(Lance l) {

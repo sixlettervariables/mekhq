@@ -37,9 +37,9 @@ import megamek.common.PlanetaryConditions;
 import megamek.common.Player;
 import megamek.common.UnitType;
 import megamek.common.logging.LogLevel;
-import mekhq.campaign.force.Lance;
 import mekhq.campaign.mission.AtBScenario;
 import mekhq.campaign.unit.Unit;
+import mekhq.module.atb.Lance;
 
 /**
  * @author Neoancient

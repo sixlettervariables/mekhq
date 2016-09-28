@@ -19,7 +19,7 @@
  * along with MekHQ.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package mekhq.campaign.force;
+package mekhq.module.atb;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -36,7 +36,6 @@ import megamek.common.Entity;
 import megamek.common.EntityWeightClass;
 import megamek.common.Infantry;
 import megamek.common.UnitType;
-import mekhq.MekHQ;
 import mekhq.MekHqXmlSerializable;
 import mekhq.MekHqXmlUtil;
 import mekhq.campaign.Campaign;
@@ -47,7 +46,6 @@ import mekhq.campaign.personnel.Person;
 import mekhq.campaign.unit.Unit;
 import mekhq.campaign.universe.Faction;
 
-import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -468,9 +466,7 @@ public class Lance implements Serializable, MekHqXmlSerializable {
 
     @Override
     public void writeToXml(PrintWriter pw1, int indent) {
-        pw1.println(MekHqXmlUtil.indentStr(indent) + "<lance type=\""
-                +this.getClass().getName()
-                +"\">");
+        pw1.println(MekHqXmlUtil.indentStr(indent) + "<lance>");
         pw1.println(MekHqXmlUtil.indentStr(indent+1)
                 +"<forceId>"
                 + forceId
@@ -492,29 +488,21 @@ public class Lance implements Serializable, MekHqXmlSerializable {
     }
 
     public static Lance generateInstanceFromXML(Node wn) {
-        Lance retVal = null;
-        NamedNodeMap attrs = wn.getAttributes();
-        Node classNameNode = attrs.getNamedItem("type");
-        String className = classNameNode.getTextContent();
-        try {
-            retVal = (Lance) Class.forName(className).newInstance();
-            NodeList nl = wn.getChildNodes();
+        Lance retVal = new Lance();
+        NodeList nl = wn.getChildNodes();
 
-            for (int x=0; x<nl.getLength(); x++) {
-                Node wn2 = nl.item(x);
+        for (int x=0; x<nl.getLength(); x++) {
+            Node wn2 = nl.item(x);
 
-                if (wn2.getNodeName().equalsIgnoreCase("forceId")) {
-                    retVal.forceId = Integer.parseInt(wn2.getTextContent());
-                } else if (wn2.getNodeName().equalsIgnoreCase("missionId")) {
-                    retVal.missionId = Integer.parseInt(wn2.getTextContent());
-                } else if (wn2.getNodeName().equalsIgnoreCase("role")) {
-                    retVal.role = Integer.parseInt(wn2.getTextContent());
-                } else if (wn2.getNodeName().equalsIgnoreCase("commanderId")) {
-                    retVal.commanderId = UUID.fromString(wn2.getTextContent());
-                }
+            if (wn2.getNodeName().equalsIgnoreCase("forceId")) {
+                retVal.forceId = Integer.parseInt(wn2.getTextContent());
+            } else if (wn2.getNodeName().equalsIgnoreCase("missionId")) {
+                retVal.missionId = Integer.parseInt(wn2.getTextContent());
+            } else if (wn2.getNodeName().equalsIgnoreCase("role")) {
+                retVal.role = Integer.parseInt(wn2.getTextContent());
+            } else if (wn2.getNodeName().equalsIgnoreCase("commanderId")) {
+                retVal.commanderId = UUID.fromString(wn2.getTextContent());
             }
-        } catch (Exception ex) {
-            MekHQ.logError(ex);
         }
         return retVal;
     }

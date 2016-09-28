@@ -427,12 +427,12 @@ public class MekHQ implements GameListener {
         	resolveDialog.setVisible(true);
         	if (campaigngui.getCampaign().getCampaignOptions().getUseAtB() &&
         			campaign.getMission(currentScenario.getMissionId()) instanceof AtBContract &&
-        			campaigngui.getCampaign().getRetirementDefectionTracker().getRetirees().size() > 0) {
+        			campaigngui.getCampaign().getAtB().getRetirementDefectionTracker().getRetirees().size() > 0) {
         		RetirementDefectionDialog rdd = new RetirementDefectionDialog(campaigngui,
         				(AtBContract)campaign.getMission(currentScenario.getMissionId()), false);
         		rdd.setVisible(true);
         		if (!rdd.wasAborted()) {
-        			getCampaign().applyRetirement(rdd.totalPayout(), rdd.getUnitAssignments());
+        			getCampaign().getAtB().applyRetirement(rdd.totalPayout(), rdd.getUnitAssignments());
         		}
         	}
         	gameThread.requestStop();
@@ -514,5 +514,9 @@ public class MekHQ implements GameListener {
 	// TODO: This needs to be way more flexible, but it will do for now.
 	private void initEventHandlers() {
 	    EVENT_BUS.register(new XPHandler());
+	}
+	
+	public static void registerEventHandler(Object handler) {
+		EVENT_BUS.register(handler);
 	}
 }

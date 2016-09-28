@@ -25,10 +25,10 @@ import mekhq.IconPackage;
 import mekhq.campaign.Campaign;
 import mekhq.campaign.force.Force;
 import mekhq.campaign.personnel.Person;
-import mekhq.campaign.personnel.RetirementDefectionTracker;
 import mekhq.campaign.unit.Unit;
 import mekhq.gui.BasicInfo;
 import mekhq.gui.dialog.RetirementDefectionDialog;
+import mekhq.module.atb.RetirementDefectionTracker;
 
 public class RetirementTableModel extends AbstractTableModel {
     /**
@@ -161,7 +161,7 @@ public class RetirementTableModel extends AbstractTableModel {
         case COL_MISC_MOD:
             return true;
         case COL_RECRUIT:
-            return campaign.getRetirementDefectionTracker().getPayout(data.get(row)).hasRecruit();
+            return campaign.getAtB().getRetirementDefectionTracker().getPayout(data.get(row)).hasRecruit();
         default:
             return false;
         }
@@ -256,18 +256,18 @@ public class RetirementTableModel extends AbstractTableModel {
         case COL_SHARES:
             return p.getNumShares(campaign.getCampaignOptions().getSharesForAll());
         case COL_PAYOUT:
-            if (null == campaign.getRetirementDefectionTracker().getPayout(p.getId())) {
+            if (null == campaign.getAtB().getRetirementDefectionTracker().getPayout(p.getId())) {
                 return "";
             }
             if (altPayout.keySet().contains(p.getId())) {
                 return formatter.format(altPayout.get(p.getId()));
             }
-            long payout = campaign.getRetirementDefectionTracker().getPayout(p.getId()).getCbills();
+            long payout = campaign.getAtB().getRetirementDefectionTracker().getPayout(p.getId()).getCbills();
             /* If no unit is required as part of the payout, the unit is part or all of the
              * final payout. If using the share system and tracking the original unit,
              * the payout is also reduced by the value of the unit.
              */
-            if ((campaign.getRetirementDefectionTracker().getPayout(p.getId()).getWeightClass() == 0 &&
+            if ((campaign.getAtB().getRetirementDefectionTracker().getPayout(p.getId()).getWeightClass() == 0 &&
                     null != unitAssignments.get(p.getId())) ||
                     (campaign.getCampaignOptions().getUseShareSystem() &&
                             campaign.getCampaignOptions().getTrackOriginalUnit() &&
@@ -276,30 +276,30 @@ public class RetirementTableModel extends AbstractTableModel {
                 payout -= campaign.getUnit(unitAssignments.get(p.getId())).getBuyCost();
             }
             if (null != unitAssignments.get(p.getId())) {
-                payout += RetirementDefectionDialog.getShortfallAdjustment(campaign.getRetirementDefectionTracker().getPayout(p.getId()).getWeightClass(),
+                payout += RetirementDefectionDialog.getShortfallAdjustment(campaign.getAtB().getRetirementDefectionTracker().getPayout(p.getId()).getWeightClass(),
                         RetirementDefectionDialog.weightClassIndex(campaign.getUnit(unitAssignments.get(p.getId()))));
             }
             /* No payout if the pilot stole a unit */
-            if (campaign.getRetirementDefectionTracker().getPayout(p.getId()).hasStolenUnit() &&
+            if (campaign.getAtB().getRetirementDefectionTracker().getPayout(p.getId()).hasStolenUnit() &&
                     null != unitAssignments.get(p.getId())) {
                 payout = 0;
             }
             return formatter.format(Math.max(payout, 0));
         case COL_UNIT:
-            if (null == campaign.getRetirementDefectionTracker().getPayout(p.getId()) ||
+            if (null == campaign.getAtB().getRetirementDefectionTracker().getPayout(p.getId()) ||
                     null == unitAssignments) {
                 return "";
             }
             if (null != unitAssignments.get(p.getId())) {
                 return campaign.getUnit(unitAssignments.get(p.getId())).getName();
-            } else if (campaign.getRetirementDefectionTracker().getPayout(p.getId()).getWeightClass() < EntityWeightClass.WEIGHT_LIGHT) {
+            } else if (campaign.getAtB().getRetirementDefectionTracker().getPayout(p.getId()).getWeightClass() < EntityWeightClass.WEIGHT_LIGHT) {
                 return "";
             } else {
-                return "Class " + campaign.getRetirementDefectionTracker().getPayout(p.getId()).getWeightClass();
+                return "Class " + campaign.getAtB().getRetirementDefectionTracker().getPayout(p.getId()).getWeightClass();
             }
         case COL_RECRUIT:
             RetirementDefectionTracker.Payout pay =
-                campaign.getRetirementDefectionTracker().getPayout(data.get(row));
+                campaign.getAtB().getRetirementDefectionTracker().getPayout(data.get(row));
             if (null == pay) {
                 return "";
             }
@@ -341,7 +341,7 @@ public class RetirementTableModel extends AbstractTableModel {
         } else if (col == COL_RECRUIT) {
             for (int i = 0; i < Person.T_NUM; i++) {
                 if (Person.getRoleDesc(i, campaign.getFaction().isClan()).equals((String)value)) {
-                    campaign.getRetirementDefectionTracker().getPayout(data.get(row)).setRecruitType(i);
+                    campaign.getAtB().getRetirementDefectionTracker().getPayout(data.get(row)).setRecruitType(i);
                     break;
                 }
             }
@@ -398,8 +398,8 @@ public class RetirementTableModel extends AbstractTableModel {
             setForeground(isSelected?Color.WHITE:Color.BLACK);
             if (isSelected) {
                 setBackground(Color.DARK_GRAY);
-            } else if (null != campaign.getRetirementDefectionTracker().getPayout(p.getId()) &&
-                    campaign.getRetirementDefectionTracker().getPayout(p.getId()).getWeightClass() > 0) {
+            } else if (null != campaign.getAtB().getRetirementDefectionTracker().getPayout(p.getId()) &&
+                    campaign.getAtB().getRetirementDefectionTracker().getPayout(p.getId()).getWeightClass() > 0) {
                 setBackground(Color.LIGHT_GRAY);
             } else {
                 // tiger stripes
@@ -490,8 +490,8 @@ public class RetirementTableModel extends AbstractTableModel {
 
             if (isSelected) {
                 c.setBackground(Color.DARK_GRAY);
-            } else if (null != campaign.getRetirementDefectionTracker().getPayout(p.getId()) &&
-                        campaign.getRetirementDefectionTracker().getPayout(p.getId()).getWeightClass() > 0) {
+            } else if (null != campaign.getAtB().getRetirementDefectionTracker().getPayout(p.getId()) &&
+                        campaign.getAtB().getRetirementDefectionTracker().getPayout(p.getId()).getWeightClass() > 0) {
                 c.setBackground(Color.LIGHT_GRAY);
             } else {
                 // tiger stripes
