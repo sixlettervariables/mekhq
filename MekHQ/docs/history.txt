@@ -1,5 +1,8 @@
 VERSION HISTORY:
 ----------------
+v0.43.8-git
++ Bug: large craft refits calculating ammo loading times incorrectly.
+
 v0.43.7-git 
 + Issue #567: BA standard armor cannot be repaired
 + Issue #576: CCE on loading campaign with DS with missing thruster(s)
