@@ -40,9 +40,9 @@ public class LogEntryTest {
     @Test
     public void testXmlMarshalling() throws Exception {
         checkMarshalling(new LogEntry(null, null, null));
-        checkMarshalling(new LogEntry(new Date(0l), "", ""));  //$NON-NLS-1$//$NON-NLS-2$
-        checkMarshalling(new LogEntry(new Date(0l), "<desc>Some description</desc>", "<type>Some type</type>")); //$NON-NLS-1$ //$NON-NLS-2$
-        checkMarshalling(new LogEntry(new Date(0l), "Some <em>xml-fragment</em> description", "Some <em>xml-fragment</em> type")); //$NON-NLS-1$ //$NON-NLS-2$
+        checkMarshalling(new LogEntry(new Date(3025, 6, 15), "", ""));  //$NON-NLS-1$//$NON-NLS-2$
+        checkMarshalling(new LogEntry(new Date(3025, 6, 15), "<desc>Some description</desc>", "<type>Some type</type>")); //$NON-NLS-1$ //$NON-NLS-2$
+        checkMarshalling(new LogEntry(new Date(3025, 6, 15), "Some <em>xml-fragment</em> description", "Some <em>xml-fragment</em> type")); //$NON-NLS-1$ //$NON-NLS-2$
     }
 
     private static void checkMarshalling(LogEntry le) throws Exception {
