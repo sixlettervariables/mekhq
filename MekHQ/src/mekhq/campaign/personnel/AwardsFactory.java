@@ -51,8 +51,6 @@ public class AwardsFactory {
      */
     private Map<String, Map<String,Award>> awardsMap;
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-
     private AwardsFactory(){
         awardsMap = new HashMap<>();
 
@@ -116,7 +114,7 @@ public class AwardsFactory {
                 Node wn2 = nl.item(x);
 
                 if (wn2.getNodeName().equalsIgnoreCase("date")) {
-                    date = DATE_FORMAT.parse(wn2.getTextContent().trim());
+                    date = MekHqXmlUtil.parseDate(wn2.getTextContent());
                 } else if (wn2.getNodeName().equalsIgnoreCase("name")) {
                     name = wn2.getTextContent();
                 } else if (wn2.getNodeName().equalsIgnoreCase("set")){
