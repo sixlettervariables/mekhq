@@ -72,8 +72,6 @@ public class Award implements MekHqXmlSerializable, Comparable<Award>, Serializa
 
     private Date date;
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
-
     public Award(){}
 
     public Award(String name, String set,  String description, String medal, String ribbon, String misc, int xp, int edge, boolean stackable, int id) {
@@ -98,7 +96,7 @@ public class Award implements MekHqXmlSerializable, Comparable<Award>, Serializa
     public void writeToXml(PrintWriter pw1, int indent) {
         pw1.append(MekHqXmlUtil.indentStr(indent)).append("<award>");
 
-        pw1.append("<date>").append(DATE_FORMAT.format(date)).append("</date>");
+        pw1.append("<date>").append(MekHqXmlUtil.formatDate(date)).append("</date>");
         pw1.append("<set>").append(MekHqXmlUtil.escape(this.set)).append("</set>");
         pw1.append("<name>").append(MekHqXmlUtil.escape(this.name)).append("</name>");
 

@@ -39,11 +39,6 @@ import mekhq.MekHqXmlUtil;
  */
 public class LogEntry implements Cloneable, MekHqXmlSerializable {
 
-    private static final SimpleDateFormat dateFormat() {
-        // LATER centralise date formatting so that every class doesn't have its own format and - possibly - switch to java.time
-        return new SimpleDateFormat("yyyy-MM-dd hh:mm:ss"); //$NON-NLS-1$
-    }
-
     public LogEntry(Date date, String desc) {
         this(date, desc, null);
     }
@@ -86,7 +81,7 @@ public class LogEntry implements Cloneable, MekHqXmlSerializable {
     public void writeToXml(PrintWriter pw, int indent) {
         StringBuilder sb = new StringBuilder();
         sb.append(MekHqXmlUtil.indentStr(indent)).append("<logEntry>"); //$NON-NLS-1$
-        if (date != null)    sb.append("<date>").append(dateFormat().format(date)).append("</date>"); //$NON-NLS-1$ //$NON-NLS-2$
+        if (date != null)    sb.append("<date>").append(MekHqXmlUtil.formatDate(date)).append("</date>"); //$NON-NLS-1$ //$NON-NLS-2$
         assert desc != null; sb.append("<desc>").append(MekHqXmlUtil.escape(desc)).append("</desc>"); //$NON-NLS-1$ //$NON-NLS-2$
         if (type != null)    sb.append("<type>").append(MekHqXmlUtil.escape(type)).append("</type>");  //$NON-NLS-1$//$NON-NLS-2$
         sb.append("</logEntry>"); //$NON-NLS-1$
@@ -110,7 +105,7 @@ public class LogEntry implements Cloneable, MekHqXmlSerializable {
                 } else if (nname.equals("type")) { //$NON-NLS-1$
                     type = MekHqXmlUtil.unEscape(node.getTextContent());
                 } else if (nname.equals("date")) { //$NON-NLS-1$
-                    date = dateFormat().parse(node.getTextContent().trim());
+                    date = MekHqXmlUtil.parseDate(node.getTextContent());
                 }
             }
         } catch (Exception ex) {
@@ -124,7 +119,7 @@ public class LogEntry implements Cloneable, MekHqXmlSerializable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        if (null != date) sb.append("[").append(dateFormat().format(date)).append("] "); //$NON-NLS-1$ //$NON-NLS-2$
+        if (null != date) sb.append("[").append(new SimpleDateFormat("yyyy-MM-dd").format(date)).append("] "); //$NON-NLS-1$ //$NON-NLS-2$
         sb.append(desc);
         if (null != type) sb.append(" (").append(type).append(")");  //$NON-NLS-1$//$NON-NLS-2$
         return sb.toString();
