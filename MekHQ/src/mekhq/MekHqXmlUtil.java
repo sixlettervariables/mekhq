@@ -5,7 +5,10 @@ import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Vector;
 
@@ -41,7 +44,6 @@ import megamek.common.Jumpship;
 import megamek.common.MULParser;
 import megamek.common.Tank;
 import megamek.common.logging.LogLevel;
-import megamek.common.util.StringUtil;
 
 public class MekHqXmlUtil {
 	private static DocumentBuilderFactory DOCUMENT_BUILDER_FACTORY;
@@ -611,6 +613,24 @@ public class MekHqXmlUtil {
 		return retVal;
 	}
 
+	/** 
+	 * Parse a date from an XML node's content.
+	 * @param value The date from an XML node's content.
+	 * @return The Date retrieved from the XML node content.
+	 */
+	public static Date parseDate(String value) throws ParseException {
+		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(value.trim());
+	}
+
+	/**
+	 * Formats a Date suitable for writing to an XML node.
+	 * @param date The date to format for XML.
+	 * @return A String suitable for writing a date to an XML node.
+	 */
+	public static String formatDate(Date date) {
+		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+	}
+
     /** Escapes a string to store in an XML element.
       * @param string The string to be encoded
       * @return An encoded copy of the string
@@ -624,7 +644,7 @@ public class MekHqXmlUtil {
      */
     public static String unEscape(String string) {
       return StringEscapeUtils.unescapeXml(string);
-    }
+	}
 
     public static String getEntityNameFromXmlString(Node node) {
     	NamedNodeMap attrs = node.getAttributes();
