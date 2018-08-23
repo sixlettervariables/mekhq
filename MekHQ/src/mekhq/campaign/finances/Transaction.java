@@ -23,10 +23,10 @@ package mekhq.campaign.finances;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Collections;
-import java.util.Date;
 import java.util.Vector;
 
 import mekhq.MekHQ;
@@ -42,7 +42,7 @@ import org.w3c.dom.NodeList;
  */
 public class Transaction implements Serializable {
 	
-	private static final long serialVersionUID = -8772148858528954672L;
+	private static final long serialVersionUID = 2L;
 	
 	public final static int C_MISC            = 0;
 	public final static int C_EQUIP           = 1;
@@ -113,14 +113,14 @@ public class Transaction implements Serializable {
 
 	private long amount;
 	private String description;
-	private Date date;
+	private LocalDate date;
 	private int category;
 	
 	public Transaction() {
 		this(-1,-1,"",null);
 	}
 	
-	public Transaction(long a, int c, String d, Date dt) {
+	public Transaction(long a, int c, String d, LocalDate dt) {
 		amount = a;
 		category = c;
 		description = d;
@@ -209,11 +209,11 @@ public class Transaction implements Serializable {
 		return getCategoryName(getCategory());
 	}
 	
-	public Date getDate() {
+	public LocalDate getDate() {
 		return date;
 	}
 
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
@@ -253,7 +253,7 @@ public class Transaction implements Serializable {
 			} else if (wn2.getNodeName().equalsIgnoreCase("date")) {
 				try {
 					retVal.date = MekHqXmlUtil.parseDate(wn2.getTextContent());
-				} catch (ParseException e) {
+				} catch (DateTimeParseException e) {
 					MekHQ.getLogger().error(Transaction.class, "generateInstanceFromXML", 
 						"Could not parse <date>", e);
 				}
@@ -273,6 +273,7 @@ public class Transaction implements Serializable {
     }
 
     public String toText() {
-        return new SimpleDateFormat("MM/dd/yyyy").format(getDate()) + ", " + getCategoryName() + ", " + getDescription() + ", " + getAmount();
+		DateTimeFormatter df = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+        return getDate().format(df) + ", " + getCategoryName() + ", " + getDescription() + ", " + getAmount();
     }
 }

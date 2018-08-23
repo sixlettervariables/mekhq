@@ -165,7 +165,7 @@ public class MissingEnginePart extends MissingPart {
 
 	@Override
 	public boolean isAcceptableReplacement(Part part, boolean refit) {
-	    int year = campaign.getCalendar().get(GregorianCalendar.YEAR);
+	    int year = campaign.getGameYear();
 		if(part instanceof EnginePart) {
 			Engine eng = ((EnginePart)part).getEngine();
 			if (null != eng) {

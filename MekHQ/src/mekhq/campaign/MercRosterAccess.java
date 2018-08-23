@@ -1,6 +1,7 @@
 package mekhq.campaign;
 
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -108,7 +109,7 @@ public class MercRosterAccess extends SwingWorker<Void, Void> {
         //write dates
         try {
             preparedStatement = connect.prepareStatement("UPDATE " + table + ".dates SET currentdate=?");
-            preparedStatement.setDate(1, new java.sql.Date(campaign.getCalendar().getTimeInMillis()));
+            preparedStatement.setDate(1, Date.valueOf(campaign.getDate()));
             preparedStatement.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
@@ -457,10 +458,10 @@ public class MercRosterAccess extends SwingWorker<Void, Void> {
                 preparedStatement.setInt(6, forceId);
                 preparedStatement.setInt(7, 1);
                 //TODO: get joining date right
-                preparedStatement.setDate(8, new java.sql.Date(p.getBirthday().getTimeInMillis()));
+                preparedStatement.setDate(8, Date.valueOf(p.getBirthday()));
                 //TODO: combine personnel log with biography
                 preparedStatement.setString(9, p.getBiography());
-                preparedStatement.setDate(10, new java.sql.Date(p.getBirthday().getTimeInMillis()));
+                preparedStatement.setDate(10, Date.valueOf(p.getBirthday()));
                 preparedStatement.setString(11, p.getId().toString());
                 if(preparedStatement.executeUpdate() < 1) {
                     //no prior record so insert
@@ -472,9 +473,9 @@ public class MercRosterAccess extends SwingWorker<Void, Void> {
                     preparedStatement.setString(5, getMercRosterStatusName(p.getStatus()));
                     preparedStatement.setInt(6, forceId);
                     preparedStatement.setInt(7, 1);
-                    preparedStatement.setDate(8, new java.sql.Date(p.getBirthday().getTimeInMillis()));
+                    preparedStatement.setDate(8, Date.valueOf(p.getBirthday()));
                     preparedStatement.setString(9, p.getBiography());
-                    preparedStatement.setDate(10, new java.sql.Date(p.getBirthday().getTimeInMillis()));
+                    preparedStatement.setDate(10, Date.valueOf(p.getBirthday()));
                     preparedStatement.setString(11, p.getId().toString());
                     preparedStatement.executeUpdate();
                 }
@@ -509,7 +510,7 @@ public class MercRosterAccess extends SwingWorker<Void, Void> {
                     preparedStatement = connect.prepareStatement("INSERT INTO " + table + ".kills (parent, type, killdate, equipment) VALUES (?, ?, ?, ?)");
                     preparedStatement.setInt(1, id);
                     preparedStatement.setString(2, truncateString(k.getWhatKilled(), 45));
-                    preparedStatement.setDate(3, new java.sql.Date(k.getDate().getTime()));
+                    preparedStatement.setDate(3, Date.valueOf(k.getDate()));
                     preparedStatement.setString(4, truncateString(k.getKilledByWhat(), 45));
                     preparedStatement.executeUpdate();
                 }

@@ -20,8 +20,8 @@
 package mekhq.campaign.market;
 
 import java.io.PrintWriter;
+import java.time.LocalDate;
 import java.util.Collections;
-import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,7 +54,7 @@ public class PersonnelMarketStratOps implements PersonnelMarketMethod {
             if (roll == 2) { // Medical
                 p = c.newPerson(Person.T_DOCTOR);
             } else if (roll == 3) { // ASF or Proto Pilot
-                if (c.getFaction().isClan() && c.getCalendar().after(new GregorianCalendar(3059, 1, 1)) && Compute.d6(2) < 6) {
+                if (c.getFaction().isClan() && c.getDate().isAfter(LocalDate.of(3059, 1, 1)) && Compute.d6(2) < 6) {
                     p = c.newPerson(Person.T_PROTO_PILOT);
                 } else {
                     p = c.newPerson(Person.T_AERO_PILOT);

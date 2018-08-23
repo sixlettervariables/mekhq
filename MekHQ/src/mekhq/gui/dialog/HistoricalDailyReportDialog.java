@@ -27,12 +27,11 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.Date;
 import java.util.ResourceBundle;
-import java.util.concurrent.TimeUnit;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -64,7 +63,7 @@ public class HistoricalDailyReportDialog extends JDialog {
     private DailyReportLogPanel logPanel;
     private JButton closeBtn;
     private JLabel cacheInfoLabel;
-    private DateFormat dateFormat = new SimpleDateFormat("EEEE, MMMM d yyyy");
+    private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("EEEE, MMMM d yyyy");
 
     /**
      * HistoricalDailyReportDialog - opens a dialog that shows a history of the daily log
@@ -157,11 +156,11 @@ public class HistoricalDailyReportDialog extends JDialog {
 
     private void updateLogPanel(Integer days) {
         logPanel.clearLogPanel();
-        Date trackDay = null;
-        long currentTime = gui.getCampaign().getDate().getTime();
+        LocalDate trackDay = null;
+        LocalDate currentTime = gui.getCampaign().getDate();
         for (LogEntry log : gui.getCampaign().inMemoryLogHistory) {
-            long diff = currentTime - log.getDate().getTime();
-            if (TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS) < days) {
+            long diff = ChronoUnit.DAYS.between(log.getDate(), currentTime);
+            if (diff < days) {
                 if (!log.getDate().equals(trackDay)) {
                     logPanel.appendLog(Collections.singletonList("<hr>"));
                     logPanel.appendLog(Collections.singletonList("<b>"+dateFormat.format(log.getDate())+"</b>"));

@@ -3965,7 +3965,7 @@ public class Unit implements MekHqXmlSerializable, ITechnology {
             //it would be better to just use the unit extinction date itself, but given
             //that there are no canon extinction/reintro dates for units, we will use this
             //instead
-            if(p.isExtinct(campaign.getCalendar().get(Calendar.YEAR), campaign.getFaction().isClan())) {
+            if(p.isExtinct(campaign.getGameYear(), campaign.getFaction().isClan())) {
                 newAvailability = EquipmentType.RATING_X;
             }
             if(newAvailability > availability) {
@@ -4294,7 +4294,7 @@ public class Unit implements MekHqXmlSerializable, ITechnology {
         // Now for extended parts cost modifiers
         if (campaign.getCampaignOptions().useExtendedPartsModifier()) {
             Engine en = entity.getEngine();
-            int currentYear = campaign.getCalendar().get(Calendar.YEAR);
+            int currentYear = campaign.getGameYear();
             int rating = getTechRating();
             if (((currentYear > 2859) && (currentYear < 3040))
                     && (!campaign.getFaction().isClan() && !campaign.getFaction().isComstar())) {
@@ -4563,7 +4563,7 @@ public class Unit implements MekHqXmlSerializable, ITechnology {
 
     public SimpleTechLevel getSimpleTechLevel() {
         if (campaign.useVariableTechLevel()) {
-            return getSimpleLevel(campaign.getCalendar().get(Calendar.YEAR));
+            return getSimpleLevel(campaign.getGameYear());
         } else {
             return getStaticTechLevel();
         }

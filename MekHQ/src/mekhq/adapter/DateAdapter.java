@@ -18,24 +18,21 @@
  */
 package mekhq.adapter;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 import javax.xml.bind.annotation.adapters.XmlAdapter;
 
-import org.joda.time.DateTime;
-import org.joda.time.chrono.GJChronology;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
-public class DateAdapter extends XmlAdapter<String, DateTime> {
-    private final static DateTimeFormatter FORMATTER =
-        DateTimeFormat.forPattern("yyyy-MM-dd").withChronology(GJChronology.getInstanceUTC());
+public class DateAdapter extends XmlAdapter<String, LocalDate> {
+    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
     
     @Override
-    public DateTime unmarshal(final String xml) throws Exception {
-        return FORMATTER.parseDateTime(xml);
+    public LocalDate unmarshal(final String xml) throws Exception {
+        return LocalDate.parse(xml, FORMATTER);
     }
 
     @Override
-    public String marshal(final DateTime object) throws Exception {
-        return object.toString(FORMATTER);
+    public String marshal(final LocalDate object) throws Exception {
+        return object.format(FORMATTER);
     }
 }

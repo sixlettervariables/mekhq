@@ -23,17 +23,15 @@ package mekhq.campaign;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Locale;
 
-import org.joda.time.DateTime;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import megamek.common.logging.LogLevel;
 import mekhq.MekHQ;
 import mekhq.MekHqXmlUtil;
-import mekhq.Utilities;
 import mekhq.campaign.event.LocationChangedEvent;
 import mekhq.campaign.finances.Transaction;
 import mekhq.campaign.universe.Planet;
@@ -103,13 +101,12 @@ public class CurrentLocation implements Serializable {
         return transitTime;
     }
 
-    public String getReport(Date date) {
-        DateTime now = Utilities.getDateTimeDay(date);
+    public String getReport(LocalDate date) {
         StringBuilder sb = new StringBuilder();
         sb.append("<html><b>Current Location</b><br>");
-        sb.append(currentPlanet.getPrintableName(now)).append("<br>");
+        sb.append(currentPlanet.getPrintableName(date)).append("<br>");
         if((null != jumpPath) && !jumpPath.isEmpty()) {
-            sb.append("In transit to ").append(jumpPath.getLastPlanet().getPrintableName(now)).append(" ");
+            sb.append("In transit to ").append(jumpPath.getLastPlanet().getPrintableName(date)).append(" ");
         }
         if(isOnPlanet()) {
             sb.append("<i>on planet</i>");
@@ -119,8 +116,8 @@ public class CurrentLocation implements Serializable {
         } else {
             sb.append("<i>").append(String.format(Locale.ROOT, "%.2f", getTransitTime())).append(" days out </i>");
         }
-        if(!Double.isInfinite(currentPlanet.getRechargeTime(now))) {
-            sb.append(", <i>").append(String.format(Locale.ROOT, "%.0f", (100.0 * rechargeTime)/currentPlanet.getRechargeTime(now))).append("% charged </i>");
+        if(!Double.isInfinite(currentPlanet.getRechargeTime(date))) {
+            sb.append(", <i>").append(String.format(Locale.ROOT, "%.0f", (100.0 * rechargeTime)/currentPlanet.getRechargeTime(date))).append("% charged </i>");
         }
         return sb.append("</html>").toString();
     }
@@ -140,7 +137,7 @@ public class CurrentLocation implements Serializable {
     public void newDay(Campaign campaign) {
         //recharge even if there is no jump path
         //because jumpships don't go anywhere
-        DateTime currentDate = Utilities.getDateTimeDay(campaign.getCalendar());
+        LocalDate currentDate = campaign.getDate();
         double hours = 24.0;
         double neededRechargeTime = currentPlanet.getRechargeTime(currentDate);
         double usedRechargeTime = Math.min(hours, neededRechargeTime - rechargeTime);
@@ -169,7 +166,7 @@ public class CurrentLocation implements Serializable {
             if(isAtJumpPoint() && (rechargeTime >= neededRechargeTime)) {
                 //jump
                 if(campaign.getCampaignOptions().payForTransport()) {
-                    if(!campaign.getFinances().debit(campaign.calculateCostPerJump(true, campaign.getCampaignOptions().useEquipmentContractBase()), Transaction.C_TRANSPORT, "jump from " + currentPlanet.getName(currentDate) + " to " + jumpPath.get(1).getName(currentDate), campaign.getCalendar().getTime())) {
+                    if(!campaign.getFinances().debit(campaign.calculateCostPerJump(true, campaign.getCampaignOptions().useEquipmentContractBase()), Transaction.C_TRANSPORT, "jump from " + currentPlanet.getName(currentDate) + " to " + jumpPath.get(1).getName(currentDate), currentDate)) {
                         campaign.addReport("<font color='red'><b>You cannot afford to make the jump!</b></font>");
                         return;
                     }

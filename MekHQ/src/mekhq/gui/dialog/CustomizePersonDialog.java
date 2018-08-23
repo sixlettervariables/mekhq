@@ -15,11 +15,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Enumeration;
-import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.ResourceBundle;
 
@@ -63,7 +63,7 @@ public class CustomizePersonDialog extends javax.swing.JDialog implements Dialog
 	 * This dialog is used to both hire new pilots and to edit existing ones
 	 * 
 	 */
-	private static final long serialVersionUID = -6265589976779860566L;
+	private static final long serialVersionUID = 2L;
 	private Person person;
     private ArrayList<DialogOptionComponent> optionComps = new ArrayList<DialogOptionComponent>();
     private Hashtable<String, JSpinner> skillLvls = new Hashtable<String, JSpinner>();
@@ -71,9 +71,9 @@ public class CustomizePersonDialog extends javax.swing.JDialog implements Dialog
     private Hashtable<String, JLabel> skillValues = new Hashtable<String, JLabel>();
     private Hashtable<String, JCheckBox> skillChks = new Hashtable<String, JCheckBox>();
     private PilotOptions options;
-    private GregorianCalendar birthdate;
-    private GregorianCalendar recruitment;
-    private SimpleDateFormat dateFormat;
+    private LocalDate birthdate;
+    private LocalDate recruitment;
+    private DateTimeFormatter dateFormat;
     private Frame frame;
     
     private javax.swing.JButton btnClose;
@@ -121,16 +121,16 @@ public class CustomizePersonDialog extends javax.swing.JDialog implements Dialog
         super(parent, modal);
         this.campaign = campaign;
         this.frame = parent;
-        this.dateFormat = new SimpleDateFormat("MMMM d yyyy");
+        this.dateFormat = DateTimeFormatter.ofPattern("MMMM d yyyy");
         this.person = person;
         initializePilotAndOptions();
         setLocationRelativeTo(parent);
     }
 
     private void initializePilotAndOptions () {
-        this.birthdate = (GregorianCalendar)person.getBirthday().clone();
+        this.birthdate = person.getBirthday();
     	if(campaign.getCampaignOptions().getUseTimeInService() && person.getRecruitment() != null) {
-            this.recruitment = (GregorianCalendar)person.getRecruitment().clone();
+            this.recruitment = person.getRecruitment();
         }
     	this.options = person.getOptions();	
     	initComponents();
@@ -369,7 +369,7 @@ public class CustomizePersonDialog extends javax.swing.JDialog implements Dialog
         gridBagConstraints.anchor = java.awt.GridBagConstraints.WEST;
         panDemog.add(btnDate, gridBagConstraints);
         
-        lblAge.setText(person.getAge(campaign.getCalendar()) + " " + resourceMap.getString("age")); // NOI18N
+        lblAge.setText(person.getAge(campaign.getDate()) + " " + resourceMap.getString("age")); // NOI18N
         lblAge.setName("lblAge"); // NOI18N
         gridBagConstraints = new java.awt.GridBagConstraints();
         gridBagConstraints.gridx = 2;
@@ -688,7 +688,7 @@ public class CustomizePersonDialog extends javax.swing.JDialog implements Dialog
 			break;
 		}
 		textBloodname.setText(Bloodname.randomBloodname(campaign.getFactionCode(), phenotype,
-					campaign.getCalendar().get(Calendar.YEAR)).getName());   	
+					campaign.getGameYear()).getName());   	
     }
 
     public void refreshSkills() {
@@ -936,11 +936,11 @@ public class CustomizePersonDialog extends javax.swing.JDialog implements Dialog
     }
     
     private String getDateAsString() {
-        return dateFormat.format(birthdate.getTime());
+        return dateFormat.format(birthdate);
     }
 
     private String getDateAsString2() {
-        return dateFormat.format(recruitment.getTime());
+        return dateFormat.format(recruitment);
     }
 
     private void changeSkillValue(String type) {
@@ -988,18 +988,7 @@ public class CustomizePersonDialog extends javax.swing.JDialog implements Dialog
     }
 
     public int getAge() {
-    	// Get age based on year
-    	int age = campaign.getCalendar().get(Calendar.YEAR) - birthdate.get(Calendar.YEAR);
-
-    	// Add the tentative age to the date of birth to get this year's birthday
-    	GregorianCalendar tmpDate = (GregorianCalendar) birthdate.clone();
-    	tmpDate.add(Calendar.YEAR, age);
-
-    	// If this year's birthday has not happened yet, subtract one from age
-    	if (campaign.getCalendar().before(tmpDate)) {
-    	    age--;
-    	}
-    	return age;
+    	return (int)ChronoUnit.YEARS.between(birthdate, campaign.getDate());
     }
     
     private void backgroundChanged() {

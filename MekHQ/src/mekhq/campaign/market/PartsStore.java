@@ -24,7 +24,6 @@ package mekhq.campaign.market;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -356,7 +355,7 @@ public class PartsStore implements Serializable {
 
 	private void stockEngines(Campaign c) {
 		Engine engine;
-		int year = c.getCalendar().get(GregorianCalendar.YEAR);
+		int year = c.getGameYear();
 		for(int rating = 10; rating <= 400; rating += 5) {
 			for(int ton = 5; ton <= 100; ton += 5) {
 				for(int i = 0; i <= Engine.FISSION; i++) {

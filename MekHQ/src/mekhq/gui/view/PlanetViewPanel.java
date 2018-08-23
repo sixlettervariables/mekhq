@@ -16,6 +16,7 @@ import java.awt.Image;
 import java.awt.Insets;
 import java.awt.RenderingHints;
 import java.awt.geom.Arc2D;
+import java.time.LocalDate;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
@@ -25,8 +26,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.text.DefaultCaret;
-
-import org.joda.time.DateTime;
 
 import megamek.common.util.EncodeControl;
 import megamek.common.util.ImageUtil;
@@ -98,7 +97,7 @@ public class PlanetViewPanel extends JPanel {
         setBackground(Color.WHITE);
 
         pnlStats.setName("pnlStats");
-        pnlStats.setBorder(BorderFactory.createTitledBorder(planet.getPrintableName(Utilities.getDateTimeDay(campaign.getCalendar()))));
+        pnlStats.setBorder(BorderFactory.createTitledBorder(planet.getPrintableName(campaign.getDate())));
         pnlStats.setBackground(Color.WHITE);
         fillStats();
         gridBagConstraints = new GridBagConstraints();
@@ -156,7 +155,7 @@ public class PlanetViewPanel extends JPanel {
         int i = 0;
         JLabel lblNeighbor;
         JLabel lblDistance;
-        DateTime currentDate = Utilities.getDateTimeDay(campaign.getCalendar());
+        LocalDate currentDate = campaign.getDate();
         for(Planet neighbor : campaign.getAllReachablePlanetsFrom(planet)) {
             if(neighbor.equals(planet)) {
                 continue;
@@ -241,7 +240,7 @@ public class PlanetViewPanel extends JPanel {
         
         GridBagConstraints gridBagConstraints;
         pnlStats.setLayout(new GridBagLayout());
-        DateTime currentDate = Utilities.getDateTimeDay(campaign.getCalendar());
+        LocalDate currentDate = campaign.getDate();
 
         lblOwner.setName("lblOwner"); // NOI18N
         lblOwner.setText("<html><i>" + planet.getFactionDesc(currentDate) + "</i></html>");

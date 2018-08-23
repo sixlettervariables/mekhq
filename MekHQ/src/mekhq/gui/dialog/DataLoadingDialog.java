@@ -229,7 +229,7 @@ public class DataLoadingDialog extends JDialog implements PropertyChangeListener
                 	campaign.calendar = dc.getDate();
                 	// Ensure that the MegaMek year GameOption matches the campaign year
                     GameOptions gameOpts = campaign.getGameOptions();
-                    int campaignYear = campaign.getCalendar().get(Calendar.YEAR);
+                    int campaignYear = campaign.getGameYear();
                     if (gameOpts.intOption("year") != campaignYear) {
                         gameOpts.getOption("year").setValue(campaignYear);
                     }
@@ -272,7 +272,7 @@ public class DataLoadingDialog extends JDialog implements PropertyChangeListener
         				RandomFactionGenerator.getInstance().startup(campaign);
         				campaign.getContractMarket().generateContractOffers(campaign, true);
         				campaign.getUnitMarket().generateUnitOffers(campaign);
-        				campaign.getRetirementDefectionTracker().setLastRetirementRoll(campaign.getCalendar());
+        				campaign.getRetirementDefectionTracker().setLastRetirementRoll(campaign.getDate());
         			}
         		}
             } else {

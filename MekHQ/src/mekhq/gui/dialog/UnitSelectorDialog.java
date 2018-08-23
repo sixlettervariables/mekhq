@@ -122,7 +122,7 @@ public class UnitSelectorDialog extends JDialog {
         //and then update when needed
         this.campaign = c;
         formatter = new DecimalFormat();
-        asd = new AdvancedSearchDialog(frame, campaign.getCalendar().get(GregorianCalendar.YEAR));
+        asd = new AdvancedSearchDialog(frame, campaign.getGameYear());
         initComponents();
 
         MechSummary[] allMechs = MechSummaryCache.getInstance().getAllMechs();
@@ -466,7 +466,7 @@ public class UnitSelectorDialog extends JDialog {
         RowFilter<MechTableModel, Integer> unitTypeFilter = null;
         final int nClass = comboWeight.getSelectedIndex();
         final int nUnit = comboUnitType.getSelectedIndex();
-        final int year = campaign.getCalendar().get(GregorianCalendar.YEAR);
+        final int year = campaign.getGameYear();
         //If current expression doesn't parse, don't update.
         try {
             unitTypeFilter = new RowFilter<MechTableModel,Integer>() {

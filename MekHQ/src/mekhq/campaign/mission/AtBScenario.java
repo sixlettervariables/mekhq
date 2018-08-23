@@ -25,9 +25,8 @@ package mekhq.campaign.mission;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -253,7 +252,7 @@ public abstract class AtBScenario extends Scenario implements IAtBScenario {
         rerollsRemaining = 0;
     }
     
-    public void initialize(Campaign c, Lance lance, boolean attacker, Date date) {
+    public void initialize(Campaign c, Lance lance, boolean attacker, LocalDate date) {
         this.attacker = attacker;
 
         alliesPlayer = new ArrayList<Entity>();
@@ -406,7 +405,7 @@ public abstract class AtBScenario extends Scenario implements IAtBScenario {
         if (null != mission) {
             Planet p = Planets.getInstance().getPlanets().get(mission.getPlanetId());
             if (null != p) {
-                atmosphere = Utilities.nonNull(p.getPressure(Utilities.getDateTimeDay(campaign.getCalendar())), atmosphere);
+                atmosphere = Utilities.nonNull(p.getPressure(campaign.getDate()), atmosphere);
                 gravity = Utilities.nonNull(p.getGravity(), gravity).floatValue();
             }
         }
@@ -944,17 +943,17 @@ public abstract class AtBScenario extends Scenario implements IAtBScenario {
         if (unitType == UnitType.TANK) {
             if (campaign.getCampaignOptions().getOpforUsesVTOLs()) {
                 ms = campaign.getUnitGenerator()
-                        .generate(faction, unitType, weightClass, campaign.getCalendar()
-                                .get(Calendar.YEAR), quality, IUnitGenerator.MIXED_TANK_VTOL, null);            
+                        .generate(faction, unitType, weightClass, campaign.getGameYear(),
+                            quality, IUnitGenerator.MIXED_TANK_VTOL, null);            
             } else {
                 ms = campaign.getUnitGenerator()
-                        .generate(faction, unitType, weightClass, campaign.getCalendar()
-                                .get(Calendar.YEAR), quality, v -> !v.getUnitType().equals("VTOL"));
+                        .generate(faction, unitType, weightClass, campaign.getGameYear(), 
+                            quality, v -> !v.getUnitType().equals("VTOL"));
             }
         } else {
             ms = campaign.getUnitGenerator()
-                    .generate(faction, unitType, weightClass, campaign.getCalendar()
-                            .get(Calendar.YEAR), quality);
+                    .generate(faction, unitType, weightClass, campaign.getGameYear(), 
+                        quality);
         }
 
         if (ms == null) {
@@ -1022,7 +1021,7 @@ public abstract class AtBScenario extends Scenario implements IAtBScenario {
                 phenotype = -1;
             }
             if (phenotype >= 0) {
-                crewName += " " + Bloodname.randomBloodname(faction, phenotype, campaign.getCalendar().get(Calendar.YEAR)).getName();
+                crewName += " " + Bloodname.randomBloodname(faction, phenotype, campaign.getGameYear()).getName();
             }
         }
 
@@ -1456,7 +1455,7 @@ public abstract class AtBScenario extends Scenario implements IAtBScenario {
      * @param campaign  The campaign for which the turrets are being generated.
      */
     protected void addTurrets(ArrayList<Entity> list, int num, int skill, int quality, Campaign campaign) {
-    	int currentYear = campaign.getCalendar().get(Calendar.YEAR);
+    	int currentYear = campaign.getGameYear();
     	
     	List<MechSummary> msl = campaign.getUnitGenerator().generateTurrets(num, skill, quality, currentYear);
         List<Entity> entities = msl.stream().map(ms -> createEntityWithCrew("IND",
@@ -1482,7 +1481,7 @@ public abstract class AtBScenario extends Scenario implements IAtBScenario {
         
         AtBContract contract = getContract(campaign);
         
-        boolean opForOwnsPlanet = contract.getPlanet().getFactions(Utilities.getDateTimeDay(campaign.getCalendar()))
+        boolean opForOwnsPlanet = contract.getPlanet().getFactions(campaign.getDate())
                                     .contains(contract.getEnemyCode());
 
         boolean spawnConventional = opForOwnsPlanet && Compute.d6() >= 
@@ -1538,7 +1537,7 @@ public abstract class AtBScenario extends Scenario implements IAtBScenario {
         
         AtBContract contract = getContract(campaign);
         
-        boolean opForOwnsPlanet = contract.getPlanet().getFactions(Utilities.getDateTimeDay(campaign.getCalendar()))
+        boolean opForOwnsPlanet = contract.getPlanet().getFactions(campaign.getDate())
                                     .contains(contract.getEnemyCode());
         boolean spawnTurrets = opForOwnsPlanet && 
                 Compute.d6() >= CampaignOptions.MAXIMUM_D6_VALUE - campaign.getCampaignOptions().getOpforLocalUnitChance(); 

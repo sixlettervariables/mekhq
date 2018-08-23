@@ -40,6 +40,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.lang.reflect.Method;
 import java.text.NumberFormat;
+import java.time.DayOfWeek;
 import java.util.Calendar;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -326,8 +327,7 @@ public class CampaignGUI extends JPanel {
 
     public void showBloodnameDialog() {
         bloodnameDialog.setFaction(getCampaign().getFactionCode());
-        bloodnameDialog.setYear(getCampaign().getCalendar().get(
-                java.util.Calendar.YEAR));
+        bloodnameDialog.setYear(getCampaign().getGameYear());
         bloodnameDialog.setVisible(true);
     }
 
@@ -1194,7 +1194,7 @@ public class CampaignGUI extends JPanel {
         GridBagConstraints gridBagConstraints;
 
         lblLocation = new JLabel(getCampaign().getLocation().getReport(
-                getCampaign().getCalendar().getTime())); // NOI18N
+                getCampaign().getDate())); // NOI18N
 
         btnPanel = new JPanel(new GridBagLayout());
 
@@ -1502,7 +1502,7 @@ public class CampaignGUI extends JPanel {
     }
 
     public boolean nagShortDeployments() {
-        if (getCampaign().getCalendar().get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+        if (getCampaign().getDate().getDayOfWeek() != DayOfWeek.SUNDAY) {
             return false;
         }
         for (Mission m : getCampaign().getMissions()) {
@@ -3162,7 +3162,7 @@ public class CampaignGUI extends JPanel {
 
     public void refreshLocation() {
         lblLocation.setText(getCampaign().getLocation().getReport(
-                getCampaign().getCalendar().getTime()));
+                getCampaign().getDate()));
     }
 
     protected MekHQ getApplication() {

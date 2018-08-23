@@ -24,7 +24,6 @@ package mekhq.campaign.market;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Set;
 
 import org.w3c.dom.Node;
@@ -112,7 +111,7 @@ public class UnitMarket implements Serializable {
 	}
 	
 	public void generateUnitOffers(Campaign campaign) {
-		if (method == TYPE_ATBMONTHLY && campaign.getCalendar().get(Calendar.DAY_OF_MONTH) == 1) {
+		if (method == TYPE_ATBMONTHLY && campaign.getDate().getDayOfMonth() == 1) {
 			offers.clear();
 			
 			AtBContract contract = null;
@@ -167,7 +166,7 @@ public class UnitMarket implements Serializable {
 			}
 
 			if (campaign.getUnitRatingMod() >= IUnitRating.DRAGOON_B) {
-				Set<Faction> factions = campaign.getCurrentPlanet().getFactionSet(Utilities.getDateTimeDay(campaign.getCalendar()));
+				Set<Faction> factions = campaign.getCurrentPlanet().getFactionSet(campaign.getDate());
 				String faction = Utilities.getRandomItem(factions).getShortName();
 				if (campaign.getFaction().isClan() ||
 						!Faction.getFaction(faction).isClan()) {
@@ -222,15 +221,15 @@ public class UnitMarket implements Serializable {
 			MechSummary ms;
 			if (unitType == UnitType.TANK) {
 			    ms = campaign.getUnitGenerator().generate(faction, unitType, weight,
-	                    campaign.getCalendar().get(Calendar.YEAR), quality,
+	                    campaign.getGameYear(), quality,
 	                    IUnitGenerator.MIXED_TANK_VTOL, null);
 			} else {
 			    ms = campaign.getUnitGenerator().generate(faction, unitType, weight,
-					campaign.getCalendar().get(Calendar.YEAR), quality);
+					campaign.getGameYear(), quality);
 			}
 			if (ms != null) {
 				if (campaign.getCampaignOptions().limitByYear() &&
-						campaign.getCalendar().get(Calendar.YEAR) < ms.getYear()) {
+						campaign.getGameYear() < ms.getYear()) {
 					continue;
 				}
 				if ((campaign.getCampaignOptions().allowClanPurchases() && ms.isClan())
@@ -252,7 +251,7 @@ public class UnitMarket implements Serializable {
 		int weight = getRandomWeight(unitType, faction,
 				campaign.getCampaignOptions().getRegionalMechVariations());
 		MechSummary ms = campaign.getUnitGenerator().generate(faction, unitType, weight,
-				campaign.getCalendar().get(Calendar.YEAR), quality);
+				campaign.getGameYear(), quality);
 		if (ms == null) {
 			return null;
 		} else {

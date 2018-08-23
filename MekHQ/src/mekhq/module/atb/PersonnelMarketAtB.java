@@ -18,6 +18,7 @@
  */
 package mekhq.module.atb;
 
+import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -44,7 +45,7 @@ public class PersonnelMarketAtB implements PersonnelMarketMethod {
 
     @Override
     public List<Person> generatePersonnelForDay(Campaign c) {
-        if (c.getCalendar().get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+        if (c.getDate().getDayOfWeek() == DayOfWeek.MONDAY) {
             List<Person> retVal = new ArrayList<>();
             Person p = null;
             
@@ -66,7 +67,7 @@ public class PersonnelMarketAtB implements PersonnelMarketMethod {
                 }
             } else if (roll == 3 || roll == 11) {
                 int r = Compute.d6();
-                if (r == 1 && c.getCalendar().get(Calendar.YEAR) >
+                if (r == 1 && c.getGameYear() >
                 (c.getFaction().isClan()?2870:3050)) {
                     p = c.newPerson(Person.T_BA_TECH);
                 } else if (r < 4) {
@@ -94,11 +95,11 @@ public class PersonnelMarketAtB implements PersonnelMarketMethod {
                 }
             } else if (roll == 6 || roll == 8) {
                 if (c.getFaction().isClan() &&
-                        c.getCalendar().get(Calendar.YEAR) > 2870 &&
+                        c.getGameYear() > 2870 &&
                         Compute.d6(2) > 3) {
                     p = c.newPerson(Person.T_BA);
                 } else if (!c.getFaction().isClan() &&
-                        c.getCalendar().get(Calendar.YEAR) > 3050 &&
+                        c.getGameYear() > 3050 &&
                         Compute.d6(2) > 11) {
                     p = c.newPerson(Person.T_BA);
                 } else {
@@ -209,7 +210,7 @@ public class PersonnelMarketAtB implements PersonnelMarketMethod {
 
     @Override
     public List<Person> removePersonnelForDay(Campaign c, List<Person> current) {
-        if (c.getCalendar().get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+        if (c.getDate().getDayOfWeek() == DayOfWeek.MONDAY) {
             return current;
         }
         return null;

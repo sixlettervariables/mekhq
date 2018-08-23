@@ -29,8 +29,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.GregorianCalendar;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -58,6 +57,9 @@ import mekhq.campaign.rating.IUnitRating;
  */
 public class NewLoanDialog extends javax.swing.JDialog implements ActionListener, ChangeListener {
     private static final long serialVersionUID = -8038099101234445018L;
+
+    private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+
     private Frame frame;
     private Loan loan;
     private Campaign campaign;
@@ -110,7 +112,7 @@ public class NewLoanDialog extends javax.swing.JDialog implements ActionListener
         campaign = c;
         IUnitRating unitRating = c.getUnitRating();
         rating = unitRating.getModifier();
-        loan = Loan.getBaseLoanFor(rating, campaign.getCalendar());
+        loan = Loan.getBaseLoanFor(rating, campaign.getDate());
         maxCollateralValue = campaign.getFinances().getMaxCollateral(campaign);
         formatter = new DecimalFormat();
         initComponents();
@@ -559,7 +561,7 @@ public class NewLoanDialog extends javax.swing.JDialog implements ActionListener
     	loan.setRefNumber(txtNumber.getText());
     	
     	// Recalculate information based on settings
-    	loan.setNextPayment((GregorianCalendar)campaign.getCalendar().clone());
+    	loan.setNextPayment(campaign.getDate());
     	loan.setFirstPaymentDate();
     	loan.calculateAmortization();
     	
@@ -574,7 +576,7 @@ public class NewLoanDialog extends javax.swing.JDialog implements ActionListener
         lblYears.setText(loan.getYears() + " years");
         lblSchedule.setText(Finances.getScheduleName(loan.getPaymentSchedule()));
         lblPrincipal.setText(formatter.format(loan.getPrincipal()));
-        lblFirstPayment.setText(SimpleDateFormat.getDateInstance().format(loan.getNextPayDate()));
+        lblFirstPayment.setText(dateFormat.format(loan.getNextPayDate()));
         lblPayAmount.setText(formatter.format(loan.getPaymentAmount()));
         lblNPayment.setText(formatter.format(loan.getRemainingPayments()));
         lblTotalPayment.setText(formatter.format(loan.getRemainingValue()));

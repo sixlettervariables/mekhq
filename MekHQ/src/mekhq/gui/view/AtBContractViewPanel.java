@@ -26,7 +26,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -35,7 +35,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
 import megamek.common.util.EncodeControl;
-import mekhq.Utilities;
 import mekhq.campaign.Campaign;
 import mekhq.campaign.mission.AtBContract;
 import mekhq.campaign.mission.Contract;
@@ -162,7 +161,7 @@ public class AtBContractViewPanel extends JPanel {
         GridBagConstraints gridBagConstraints;
         pnlStats.setLayout(new GridBagLayout());
         
-        SimpleDateFormat shortDateFormat = new SimpleDateFormat("MM/dd/yyyy");
+        DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
         
         int y = 0;
         
@@ -190,7 +189,7 @@ public class AtBContractViewPanel extends JPanel {
         pnlStats.add(lblLocation, gridBagConstraints);
         
         txtLocation.setName("txtLocation"); // NOI18N
-        txtLocation.setText(contract.getPlanetName(Utilities.getDateTimeDay(campaign.getCalendar())));
+        txtLocation.setText(contract.getPlanetName(campaign.getDate()));
         txtLocation.setEditable(false);
         txtLocation.setLineWrap(true);
         txtLocation.setWrapStyleWord(true);

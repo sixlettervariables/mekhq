@@ -23,6 +23,7 @@
 package mekhq.campaign.personnel;
 
 import java.io.PrintWriter;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
@@ -38,7 +39,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 
-import org.joda.time.DateTime;
 import org.w3c.dom.Node;
 
 import mekhq.MekHQ;
@@ -51,7 +51,7 @@ import mekhq.campaign.mod.am.InjuryTypes;
 @XmlRootElement(name="injury")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Injury {
-    public static final int VERSION = 1;
+    public static final int VERSION = 2;
     
     // Marshaller / unmarshaller instances
     private static Marshaller marshaller;
@@ -88,7 +88,7 @@ public class Injury {
     private int days;
     private int originalDays;
     @XmlJavaTypeAdapter(DateAdapter.class)
-    private DateTime start;
+    private LocalDate start;
     /** 0 = past injury, for scars, 1 = default, max depends on type */
     private int hits;
     private BodyLocation location;
@@ -145,11 +145,11 @@ public class Injury {
     // End UUID Control Methods
     
     // Time Control Methods
-    public DateTime getStart() {
+    public LocalDate getStart() {
         return start;
     }
     
-    public void setStart(DateTime start) {
+    public void setStart(LocalDate start) {
         this.start = Objects.requireNonNull(start);
     }
     

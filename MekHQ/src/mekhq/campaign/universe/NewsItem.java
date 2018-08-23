@@ -21,6 +21,9 @@
 
 package mekhq.campaign.universe;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Locale;
 
 import javax.xml.bind.Unmarshaller;
@@ -29,12 +32,6 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
-
-import org.joda.time.DateTime;
-import org.joda.time.Days;
-import org.joda.time.chrono.GJChronology;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import megamek.common.Compute;
 
@@ -48,11 +45,10 @@ import mekhq.Utilities;
 @XmlRootElement(name="newsItem")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class NewsItem {
-    private final static DateTimeFormatter FORMATTER =
-        DateTimeFormat.forPattern("yyyy-MM-dd").withChronology(GJChronology.getInstanceUTC());
+    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE;
     
     @XmlTransient
-    private DateTime date;
+    private LocalDate date;
     @XmlTransient
     private Precision datePrecision;
     private String headline;
@@ -103,11 +99,11 @@ public class NewsItem {
         this.service = service;
     }
 
-    public DateTime getDate() {
+    public LocalDate getDate() {
         return date;
     }
     
-    public void setDate(DateTime date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
     
@@ -134,13 +130,13 @@ public class NewsItem {
         int maxRandomDays;
         switch(datePrecision) {
             case MONTH:
-                maxRandomDays = Days.daysBetween(date, date.plusMonths(1)).getDays();
+                maxRandomDays = (int)ChronoUnit.DAYS.between(date, date.plusMonths(1));
                 break;
             case YEAR:
-                maxRandomDays = Days.daysBetween(date, date.plusYears(1)).getDays();
+                maxRandomDays = (int)ChronoUnit.DAYS.between(date, date.plusYears(1));
                 break;
             case DECADE:
-                maxRandomDays = Days.daysBetween(date, date.plusYears(10)).getDays();
+                maxRandomDays = (int)ChronoUnit.DAYS.between(date, date.plusYears(10));
                 break;
             default:
                 return;
@@ -186,7 +182,7 @@ public class NewsItem {
     }
     
     public String getFullDescription() {
-        String s = "<html><h1>" + getHeadline() + "</h1>(" + date.toString(FORMATTER) + ")<br><p>" + getPrefix() + description + "</p></html>";
+        String s = "<html><h1>" + getHeadline() + "</h1>(" + date.format(FORMATTER) + ")<br><p>" + getPrefix() + description + "</p></html>";
         return s;
     }
     
@@ -198,16 +194,16 @@ public class NewsItem {
             dateString = dateString.trim().toUpperCase(Locale.ROOT);
             // Try to parse and set proper precision
             if(dateString.matches("^\\d\\d\\dX$")) {
-                date = FORMATTER.parseDateTime(dateString.substring(0, 3) + "0-01-01");
+                date = LocalDate.parse(dateString.substring(0, 3) + "0-01-01", FORMATTER);
                 datePrecision = Precision.DECADE;
             } else if(dateString.matches("^\\d\\d\\d\\d$")) {
-                date = FORMATTER.parseDateTime(dateString + "-01-01");
+                date = LocalDate.parse(dateString + "-01-01", FORMATTER);
                 datePrecision = Precision.YEAR;
             } else if(dateString.matches("^\\d\\d\\d\\d-\\d\\d$")) {
-                date = FORMATTER.parseDateTime(dateString + "-01");
+                date = LocalDate.parse(dateString + "-01", FORMATTER);
                 datePrecision = Precision.MONTH;
             } else {
-                date = FORMATTER.parseDateTime(dateString);
+                date = LocalDate.parse(dateString, FORMATTER);
                 datePrecision = Precision.DAY;
             }
         }

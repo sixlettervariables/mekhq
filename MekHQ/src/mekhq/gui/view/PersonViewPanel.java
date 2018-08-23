@@ -8,7 +8,7 @@ package mekhq.gui.view;
 
 import java.awt.*;
 import java.awt.Dialog.ModalityType;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -525,7 +525,7 @@ public class PersonViewPanel extends JPanel {
         pnlStats.add(lblAge1, gridBagConstraints);
 
         lblAge2.setName("lblAge2"); // NOI18N
-        lblAge2.setText(Integer.toString(person.getAge(campaign.getCalendar())));
+        lblAge2.setText(Integer.toString(person.getAge(campaign.getDate())));
         gridBagConstraints = new GridBagConstraints();
         gridBagConstraints.gridx = 1;
         gridBagConstraints.gridy = firsty;
@@ -611,7 +611,7 @@ public class PersonViewPanel extends JPanel {
                 pnlStats.add(lblTimeServed1, gridBagConstraints);
 
                 lblTimeServed2.setName("lblTimeServed2"); // NOI18N
-                lblTimeServed2.setText(Integer.toString(person.getTimeInService(campaign.getCalendar())) + "yrs");
+                lblTimeServed2.setText(Integer.toString(person.getTimeInService(campaign.getDate())) + "yrs");
                 gridBagConstraints = new GridBagConstraints();
                 gridBagConstraints.gridx = 1;
                 gridBagConstraints.gridy = firsty;
@@ -624,8 +624,8 @@ public class PersonViewPanel extends JPanel {
         }
 
         if (person.getDueDate() != null) {
-            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-            String DueDate = df.format(person.getDueDate().getTime());
+            DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            String DueDate = df.format(person.getDueDate());
 
             firsty++;
             lblDuedate1.setName("lblDuedate1");

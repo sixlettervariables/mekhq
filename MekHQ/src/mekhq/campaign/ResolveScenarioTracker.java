@@ -487,7 +487,7 @@ public class ResolveScenarioTracker {
                                     + " when trying to assign kills"); //$NON-NLS-1$
                             continue;
                         }
-                        status.addKill(new Kill(p.getId(), killed, u.getEntity().getShortNameRaw(), campaign.getCalendar().getTime()));
+                        status.addKill(new Kill(p.getId(), killed, u.getEntity().getShortNameRaw(), campaign.getDate()));
                     }
                 }
             }
@@ -1208,7 +1208,7 @@ public class ResolveScenarioTracker {
                 //missing unit
                 if(blc > 0) {
                     long value = (long)(blc * unitValue);
-                    campaign.getFinances().credit(value, Transaction.C_BLC, "Battle loss compensation for " + unit.getName(), campaign.getCalendar().getTime());
+                    campaign.getFinances().credit(value, Transaction.C_BLC, "Battle loss compensation for " + unit.getName(), campaign.getDate());
                     DecimalFormat formatter = new DecimalFormat();
                     campaign.addReport(formatter.format(value) + " in battle loss compensation for " + unit.getName() + " has been credited to your account.");
                 }
@@ -1251,7 +1251,7 @@ public class ResolveScenarioTracker {
                 blcValue += repairBLC;
                 if(blc > 0 && blcValue > 0) {
                     long finalValue = (long)(blc * blcValue);
-                    campaign.getFinances().credit(finalValue, Transaction.C_BLC, "B" + blcString, campaign.getCalendar().getTime());
+                    campaign.getFinances().credit(finalValue, Transaction.C_BLC, "B" + blcString, campaign.getDate());
                     DecimalFormat formatter = new DecimalFormat();
                     campaign.addReport(formatter.format(finalValue) + " in b" + blcString + " has been credited to your account.");
                 }
@@ -1279,7 +1279,7 @@ public class ResolveScenarioTracker {
             }
             if(((Contract)getMission()).isSalvageExchange()) {
                 value = (long)((value) * (((Contract)getMission()).getSalvagePct()/100.0));
-                campaign.getFinances().credit(value, Transaction.C_SALVAGE, "salvage exchange for " + scenario.getName(),  campaign.getCalendar().getTime());
+                campaign.getFinances().credit(value, Transaction.C_SALVAGE, "salvage exchange for " + scenario.getName(),  campaign.getDate());
                 DecimalFormat formatter = new DecimalFormat();
                 campaign.addReport(formatter.format(value) + " C-Bills have been credited to your account for salvage exchange.");
             } else {
@@ -1307,7 +1307,7 @@ public class ResolveScenarioTracker {
         //lets reset the network ids from the c3UUIDs
         campaign.reloadGameEntities();
         campaign.refreshNetworks();
-        scenario.setDate(campaign.getCalendar().getTime());
+        scenario.setDate(campaign.getDate());
         if (campaign.getCampaignOptions().getUseAtB() && scenario instanceof AtBScenario) {
             ((AtBScenario)scenario).doPostResolution(campaign, contractBreaches, bonusRolls);
         }

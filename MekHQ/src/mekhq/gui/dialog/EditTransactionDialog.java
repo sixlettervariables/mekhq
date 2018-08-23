@@ -14,6 +14,7 @@ import java.awt.event.MouseListener;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.GregorianCalendar;
 import java.util.ResourceBundle;
 
@@ -56,11 +57,14 @@ public class EditTransactionDialog extends JDialog implements ActionListener, Fo
     private JButton saveButton;
     private JButton cancelButton;
 
+	private LocalDate selectedDate;
+
     public EditTransactionDialog(Transaction transaction, JFrame parent, boolean modal) {
         super(parent, modal);
         //we need to make a copy of the object since objects are referenced by passing it to the dialog
         oldTransaction = new Transaction(transaction);
         newTransaction = transaction;
+        selectedDate = transaction.getDate();
         this.parent = parent;
 
         initGUI();
@@ -75,7 +79,7 @@ public class EditTransactionDialog extends JDialog implements ActionListener, Fo
             add(buildMainPanel(), BorderLayout.CENTER);
             add(buildButtonPanel(), BorderLayout.SOUTH);
         } catch (ParseException e) {
-            MekHQ.getLogger().log(getClass(), "initGUI()", e);
+            MekHQ.getLogger().error(getClass(), "initGUI()", e);
         }
     }
 
@@ -183,20 +187,15 @@ public class EditTransactionDialog extends JDialog implements ActionListener, Fo
             newTransaction.setAmount((Long)amountField.getValue());
             newTransaction.setCategory(Transaction.getCategoryIndex((String) categoryCombo.getSelectedItem()));
             newTransaction.setDescription(descriptionField.getText());
-            try {
-                newTransaction.setDate(LONG_DATE.parse(dateButton.getText()));
-            } catch (ParseException e1) {
-                e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-            }
+            newTransaction.setDate(selectedDate);
             setVisible(false);
         } else if (cancelButton.equals(e.getSource())) {
             setVisible(false);
         } else if (dateButton.equals(e.getSource())) {
-            GregorianCalendar calendar = new GregorianCalendar();
-            calendar.setTime(newTransaction.getDate());
-            DateChooser chooser = new DateChooser(parent, calendar);
+            DateChooser chooser = new DateChooser(parent, newTransaction.getDate());
             chooser.showDateChooser();
-            dateButton.setText(LONG_DATE.format(chooser.getDate().getTime()));
+            selectedDate = chooser.getDate();
+            dateButton.setText(LONG_DATE.format(selectedDate));
             chooser.dispose();
         }
     }

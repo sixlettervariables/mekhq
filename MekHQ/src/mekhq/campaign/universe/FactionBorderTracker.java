@@ -18,6 +18,7 @@
  */
 package mekhq.campaign.universe;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -59,8 +60,8 @@ import mekhq.campaign.event.NewDayEvent;
 public class FactionBorderTracker {
     
     private final RegionHex regionHex;
-    private DateTime lastUpdate;
-    private DateTime now;
+    private LocalDate lastUpdate;
+    private LocalDate now;
     
     private Map<Faction, FactionBorders> borders;
     private Map<Faction, Map<Faction, List<Planet>>> borderPlanets;
@@ -93,7 +94,7 @@ public class FactionBorderTracker {
      */
     public FactionBorderTracker(double x, double y, double radius) {
         regionHex = new RegionHex(x, y, radius);
-        now = new DateTime();
+        now = LocalDate.now();
         lastUpdate = now;
         
         borders = new ConcurrentHashMap<>();
@@ -162,7 +163,7 @@ public class FactionBorderTracker {
      * 
      * @param when The campaign date
      */
-    public synchronized void setDate(DateTime when) {
+    public synchronized void setDate(LocalDate when) {
         invalid |= now.plusDays(dayThreshold).isAfter(when)
                 || now.minusDays(dayThreshold).isBefore(when);
         now = when;
@@ -172,7 +173,7 @@ public class FactionBorderTracker {
     /**
      * @return The campaign date of the last completed border calculation
      */
-    public synchronized DateTime getLastUpdated() {
+    public synchronized LocalDate getLastUpdated() {
         return lastUpdate;
     }
     
@@ -496,7 +497,7 @@ public class FactionBorderTracker {
      */
     @Subscribe
     public synchronized void handleNewDayEvent(NewDayEvent event) {
-        now = Utilities.getDateTimeDay(event.getCampaign().getCalendar());
+        now = event.getCampaign().getDate();
         invalid |= now.minusDays(dayThreshold).isAfter(lastUpdate)
                 || now.plusDays(dayThreshold).isBefore(lastUpdate);
 

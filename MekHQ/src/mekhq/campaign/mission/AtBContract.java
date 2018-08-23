@@ -23,12 +23,10 @@ package mekhq.campaign.mission;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.UUID;
 
 import org.w3c.dom.Node;
@@ -68,7 +66,7 @@ public class AtBContract extends Contract implements Serializable {
     /**
      * 
      */
-    private static final long serialVersionUID = 1491090021356604379L;
+    private static final long serialVersionUID = 2L;
 
     public static final int MT_GARRISONDUTY = 0;
     public static final int MT_CADREDUTY = 1;
@@ -142,7 +140,7 @@ public class AtBContract extends Contract implements Serializable {
     
     protected int requiredLances;
     protected int moraleLevel;
-    protected Date routEnd;
+    protected LocalDate routEnd;
     protected int partsAvailabilityLevel;
     protected int sharesPct;
     
@@ -159,7 +157,7 @@ public class AtBContract extends Contract implements Serializable {
      * on that date, but the scenario is not generated until the other battle
      * rolls for the week.
      */
-    protected Date specialEventScenarioDate;
+    protected LocalDate specialEventScenarioDate;
     protected int specialEventScenarioType;
     /* Lasts until end of contract */
     protected int battleTypeMod;
@@ -445,9 +443,9 @@ public class AtBContract extends Contract implements Serializable {
         setMultiplier(multiplier);
     }
     
-    public void checkMorale(GregorianCalendar calendar, int dragoonRating) {
+    public void checkMorale(LocalDate calendar, int dragoonRating) {
         if (null != routEnd) {
-            if (calendar.getTime().after(routEnd)) {
+            if (calendar.isAfter(routEnd)) {
                 moraleLevel = MORALE_NORMAL;
                 routEnd = null;
             } else {
@@ -457,11 +455,10 @@ public class AtBContract extends Contract implements Serializable {
         }
         int victories = 0;
         int defeats = 0;
-        GregorianCalendar lastMonth = (GregorianCalendar)calendar.clone();
-        lastMonth.add(Calendar.MONTH, -1);
+        LocalDate lastMonth = calendar.minusMonths(1);
         
         for (Scenario s : getScenarios()) {
-            if (lastMonth.after(s.getDate())) {
+            if (lastMonth.isAfter(s.getDate())) {
                 continue;
             }
             if (s.getStatus() == Scenario.S_VICTORY ||
@@ -551,10 +548,9 @@ public class AtBContract extends Contract implements Serializable {
         // Garrision-type, and a 1d6-3 (minimum 1) months without enemy 
         // activity for Garrision-type contracts.
         if (moraleLevel == 0 && missionType <= MT_RIOTDUTY) {
-            GregorianCalendar nextBattleRoll = (GregorianCalendar)calendar.clone();
-            nextBattleRoll.add(Calendar.MONTH, Math.max(1, Compute.d6() - 3));
-            nextBattleRoll.add(Calendar.DAY_OF_MONTH, -1);
-            routEnd = nextBattleRoll.getTime();
+            LocalDate nextBattleRoll = calendar.plusMonths(Math.max(1, Compute.d6() - 3))
+                                            .minusDays(1);
+            routEnd = nextBattleRoll;
         }
         
         moraleMod = 0;
@@ -742,11 +738,11 @@ public class AtBContract extends Contract implements Serializable {
     }
     
     public void checkEvents(Campaign c) {
-        if (c.getCalendar().get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+        if (c.getDate().getDayOfWeek() == DayOfWeek.MONDAY) {
             nextWeekBattleTypeMod = 0;
         }
 
-        if (c.getCalendar().get(Calendar.DAY_OF_MONTH) == 1) {
+        if (c.getDate().getDayOfMonth() == 1) {
             if (priorLogisticsFailure) {
                 partsAvailabilityLevel++;
                 priorLogisticsFailure = false;
@@ -824,7 +820,7 @@ public class AtBContract extends Contract implements Serializable {
                 break;
             case EVT_SPECIALMISSION:
                 c.addReport("<b>Special Event:</b> Special mission this month");
-                specialEventScenarioDate = getRandomDayOfMonth(c.getCalendar());
+                specialEventScenarioDate = getRandomDayOfMonth(c.getDate());
                 specialEventScenarioType = findSpecialMissionType();
                 break;
             case EVT_CIVILDISTURBANCE:
@@ -837,7 +833,7 @@ public class AtBContract extends Contract implements Serializable {
                 break;
             case EVT_REBELLION:
                 c.addReport("<b>Special Event:</b> Rebellion<br />+2 to next enemy morale roll");
-                specialEventScenarioDate = getRandomDayOfMonth(c.getCalendar());
+                specialEventScenarioDate = getRandomDayOfMonth(c.getDate());
                 specialEventScenarioType = AtBScenario.CIVILIANRIOT;
                 break;
             case EVT_BETRAYAL:
@@ -890,7 +886,7 @@ public class AtBContract extends Contract implements Serializable {
                     break;
                 case 2:
                     text += "Internal Dissension";
-                    specialEventScenarioDate = getRandomDayOfMonth(c.getCalendar());
+                    specialEventScenarioDate = getRandomDayOfMonth(c.getDate());
                     specialEventScenarioType = AtBScenario.AMBUSH;
                     break;
                 case 3:
@@ -919,7 +915,7 @@ public class AtBContract extends Contract implements Serializable {
                 break;
             case EVT_BIGBATTLE:
                 c.addReport("<b>Special Event:</b> Big battle this month");
-                specialEventScenarioDate = getRandomDayOfMonth(c.getCalendar());
+                specialEventScenarioDate = getRandomDayOfMonth(c.getDate());
                 specialEventScenarioType = findBigBattleType();
                 break;
             }
@@ -931,14 +927,13 @@ public class AtBContract extends Contract implements Serializable {
          * or big battle event is rolled.
          */
         if (null != specialEventScenarioDate
-                && !specialEventScenarioDate.before(c.getDate())) {
-            GregorianCalendar nextMonday = (GregorianCalendar)c.getCalendar().clone();
+                && !specialEventScenarioDate.isBefore(c.getDate())) {
+            LocalDate nextMonday = c.getDate().plusWeeks(1);
             /* value of Calendar.MONDAY depends on locale */
-            if (c.getCalendar().get(Calendar.DAY_OF_WEEK) >= Calendar.MONDAY) {
-                nextMonday.add(Calendar.DAY_OF_WEEK, 7);
+            if (nextMonday.getDayOfWeek() != DayOfWeek.MONDAY) {
+                nextMonday = nextMonday.minusDays(nextMonday.getDayOfWeek().ordinal() - DayOfWeek.MONDAY.ordinal());
             }
-            nextMonday.add(Calendar.DAY_OF_WEEK, Calendar.MONDAY - c.getCalendar().get(Calendar.DAY_OF_WEEK));
-            if (specialEventScenarioDate.before(nextMonday.getTime())) {	
+            if (specialEventScenarioDate.isBefore(nextMonday)) {	
                 AtBScenario s = AtBScenarioFactory.createScenario(c, null,
                         specialEventScenarioType, false,
                         specialEventScenarioDate);
@@ -953,10 +948,9 @@ public class AtBContract extends Contract implements Serializable {
         }
     }
     
-    public Date getRandomDayOfMonth(GregorianCalendar cal) {
-        GregorianCalendar calendar = (GregorianCalendar)cal.clone();
-        calendar.set(Calendar.DAY_OF_MONTH, Compute.randomInt(calendar.getActualMaximum(Calendar.DAY_OF_MONTH)) + 1);
-        return calendar.getTime();
+    public LocalDate getRandomDayOfMonth(LocalDate d) {
+        return LocalDate.of(d.getYear(), d.getMonth(),
+            Compute.randomInt(d.lengthOfMonth()) + 1);
     }
     
     public int findSpecialMissionType() {
@@ -1056,10 +1050,8 @@ public class AtBContract extends Contract implements Serializable {
                     campaign.addReport("Due to the " + warName +
                             " crisis your employer has invoked the emergency clause and extended the contract " +
                             extension + ((extension == 1)?" month":" months"));
-                    GregorianCalendar newEndDate = new GregorianCalendar();
-                    newEndDate.setTime(getEndingDate());
-                    newEndDate.add(Calendar.MONTH, extension);
-                    getEndingDate().setTime(newEndDate.getTimeInMillis());
+                    LocalDate newEndDate = getEndingDate().plusMonths(extension);
+                    setEndingDate(newEndDate);
                     extensionLength += extension;
                     return true;
                 }
@@ -1167,7 +1159,7 @@ public class AtBContract extends Contract implements Serializable {
         if (null != routEnd) {
             pw1.println(MekHqXmlUtil.indentStr(indent+1)
                     +"<routEnd>"
-                    + new SimpleDateFormat("yyyy-MM-dd").format(routEnd)
+                    + MekHqXmlUtil.formatDate(routEnd)
                     +"</routEnd>");
         }
         pw1.println(MekHqXmlUtil.indentStr(indent+1)
@@ -1210,7 +1202,7 @@ public class AtBContract extends Contract implements Serializable {
         if (null != specialEventScenarioDate) {
             pw1.println(MekHqXmlUtil.indentStr(indent+1)
                     +"<specialEventScenarioDate>"
-                    + new SimpleDateFormat("yyyy-MM-dd").format(specialEventScenarioDate)
+                    + MekHqXmlUtil.formatDate(specialEventScenarioDate)
                     +"</specialEventScenarioDate>");
 
             pw1.println(MekHqXmlUtil.indentStr(indent+1)
@@ -1220,7 +1212,7 @@ public class AtBContract extends Contract implements Serializable {
         }
     }
 
-    public void loadFieldsFromXmlNode(Node wn) throws ParseException {
+    public void loadFieldsFromXmlNode(Node wn) throws DateTimeParseException {
         super.loadFieldsFromXmlNode(wn);
         NodeList nl = wn.getChildNodes();
 
@@ -1262,7 +1254,7 @@ public class AtBContract extends Contract implements Serializable {
             } else if (wn2.getNodeName().equalsIgnoreCase("moraleLevel")) {
                 moraleLevel = Integer.parseInt(wn2.getTextContent());
             } else if (wn2.getNodeName().equalsIgnoreCase("routEnd")) {
-                routEnd = new SimpleDateFormat("yyyy-MM-dd").parse(wn2.getTextContent());
+                routEnd = MekHqXmlUtil.parseDate(wn2.getTextContent());
             } else if (wn2.getNodeName().equalsIgnoreCase("partsAvailabilityLevel")) {
                 partsAvailabilityLevel = Integer.parseInt(wn2.getTextContent());
             } else if (wn2.getNodeName().equalsIgnoreCase("extensionLength")) {
@@ -1282,7 +1274,7 @@ public class AtBContract extends Contract implements Serializable {
             } else if (wn2.getNodeName().equalsIgnoreCase("nextWeekBattleTypeMod")) {
                 nextWeekBattleTypeMod = Integer.parseInt(wn2.getTextContent());
             } else if (wn2.getNodeName().equalsIgnoreCase("specialEventScenarioDate")) {
-                specialEventScenarioDate = new SimpleDateFormat("yyyy-MM-dd").parse(wn2.getTextContent());
+                specialEventScenarioDate = MekHqXmlUtil.parseDate(wn2.getTextContent());
             } else if (wn2.getNodeName().equalsIgnoreCase("specialEventScenarioType")) {
                 specialEventScenarioType = Integer.parseInt(wn2.getTextContent());
             }

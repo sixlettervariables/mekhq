@@ -23,6 +23,7 @@
 package mekhq.campaign.universe;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,9 +45,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
-
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeComparator;
 
 import megamek.common.EquipmentType;
 import megamek.common.ITechnology;
@@ -224,7 +222,7 @@ public class Planet implements Serializable {
      * Package-private so that Planets can access it
      */
     @XmlTransient
-    TreeMap<DateTime, PlanetaryEvent> events;
+    TreeMap<LocalDate, PlanetaryEvent> events;
     
     //a hash to keep track of dynamic garrison changes
     //TreeMap<DateTime, List<String>> garrisonHistory;
@@ -255,7 +253,7 @@ public class Planet implements Serializable {
      * @param years The list of years acquired from the tsv file
      * @throws Exception 
      */
-    public Planet(String tsvData, List<DateTime> years) throws Exception {
+    public Planet(String tsvData, List<LocalDate> years) throws Exception {
         eventList = new ArrayList<>();
         events = new TreeMap<>();
         
@@ -286,9 +284,7 @@ public class Planet implements Serializable {
                 nameChangeYear = Integer.parseInt(yearString);
             }
             
-            // this is a dirty hack: in order to avoid colliding with faction changes, we
-            // set name changes to be a second into the new year
-            DateTime nameChangeYearDate = new DateTime(nameChangeYear, 1, 1, 0, 0, 1, 0);
+            LocalDate nameChangeYearDate = LocalDate.of(nameChangeYear, 1, 1);
             
             String altName;
             String primaryName = nameString;
@@ -359,7 +355,7 @@ public class Planet implements Serializable {
                 // of this spreadsheet
                 if(x == 3 || !eventList.get(eventList.size() - 1).faction.get(0).equals(newFaction)) {
                     PlanetaryEvent pe = new PlanetaryEvent();
-                    DateTime eventDate = years.get(x - 3);
+                    LocalDate eventDate = years.get(x - 3);
                     pe.faction = new ArrayList<String>();
                     pe.faction.add(newFaction);
                     pe.date = eventDate;
@@ -526,12 +522,12 @@ public class Planet implements Serializable {
     // Date-dependant data
     
     @SuppressWarnings("unchecked")
-    public PlanetaryEvent getOrCreateEvent(DateTime when) {
+    public PlanetaryEvent getOrCreateEvent(LocalDate when) {
         if(null == when) {
             return null;
         }
         if(null == events) {
-            events = new TreeMap<DateTime, PlanetaryEvent>(DateTimeComparator.getDateOnlyInstance());
+            events = new TreeMap<LocalDate, PlanetaryEvent>();
         }
         PlanetaryEvent event = events.get(when);
         if(null == event) {
@@ -542,7 +538,7 @@ public class Planet implements Serializable {
         return event;
     }
     
-    public PlanetaryEvent getEvent(DateTime when) {
+    public PlanetaryEvent getEvent(LocalDate when) {
         if((null == when) || (null == events)) {
             return null;
         }
@@ -556,12 +552,12 @@ public class Planet implements Serializable {
         return new ArrayList<PlanetaryEvent>(events.values());
     }
     
-    protected <T> T getEventData(DateTime when, T defaultValue, EventGetter<T> getter) {
+    protected <T> T getEventData(LocalDate when, T defaultValue, EventGetter<T> getter) {
         if( null == when || null == events || null == getter ) {
             return defaultValue;
         }
         T result = defaultValue;
-        for( DateTime date : events.navigableKeySet() ) {
+        for( LocalDate date : events.navigableKeySet() ) {
             if( date.isAfter(when) ) {
                 break;
             }
@@ -576,7 +572,7 @@ public class Planet implements Serializable {
             return Collections.<PlanetaryEvent>emptyList();
         }
         List<PlanetaryEvent> result = new ArrayList<PlanetaryEvent>();
-        for( DateTime date : events.navigableKeySet() ) {
+        for( LocalDate date : events.navigableKeySet() ) {
             if( date.getYear() > year ) {
                 break;
             }
@@ -587,13 +583,13 @@ public class Planet implements Serializable {
         return result;
     }
     
-    public String getName(DateTime when) {
+    public String getName(LocalDate when) {
         return getEventData(when, name, new EventGetter<String>() {
             @Override public String get(PlanetaryEvent e) { return e.name; }
         });
     }
 
-    public String getShortName(DateTime when) {
+    public String getShortName(LocalDate when) {
         return getEventData(when, shortName, new EventGetter<String>() {
             @Override public String get(PlanetaryEvent e) { return e.shortName; }
         });
@@ -610,7 +606,7 @@ public class Planet implements Serializable {
     }
 
     /** @return short name if set, else full name, else "unnamed" */
-    public String getPrintableName(DateTime when) {
+    public String getPrintableName(LocalDate when) {
         String result = getShortName(when);
         if( null == result ) {
             result = getName(when);
@@ -618,136 +614,136 @@ public class Planet implements Serializable {
         return null != result ? result : "unnamed"; //$NON-NLS-1$
     }
     
-    public SocioIndustrialData getSocioIndustrial(DateTime when) {
+    public SocioIndustrialData getSocioIndustrial(LocalDate when) {
         return getEventData(when, socioIndustrial, new EventGetter<SocioIndustrialData>() {
             @Override public SocioIndustrialData get(PlanetaryEvent e) { return e.socioIndustrial; }
         });
     }
 
-    public String getSocioIndustrialText(DateTime when) {
+    public String getSocioIndustrialText(LocalDate when) {
         SocioIndustrialData sid = getSocioIndustrial(when);
         return null != sid ? sid.toString() : ""; //$NON-NLS-1$
     }
 
-    public Integer getHPG(DateTime when) {
+    public Integer getHPG(LocalDate when) {
         return getEventData(when, hpg, new EventGetter<Integer>() {
             @Override public Integer get(PlanetaryEvent e) { return e.hpg; }
         });
     }
 
-    public String getHPGClass(DateTime when) {
+    public String getHPGClass(LocalDate when) {
         return StarUtil.getHPGClass(getHPG(when));
     }
 
-    public Integer getPopulationRating(DateTime when) {
+    public Integer getPopulationRating(LocalDate when) {
         return getEventData(when, populationRating, new EventGetter<Integer>() {
             @Override public Integer get(PlanetaryEvent e) { return e.populationRating; }
         });
     }
     
-    public String getPopulationRatingString(DateTime when) {
+    public String getPopulationRatingString(LocalDate when) {
         Integer pops = getPopulationRating(when);
         return (null != pops) ? StarUtil.getPopulationRatingString(pops.intValue()) : "unknown";
     }
     
-    public String getGovernment(DateTime when) {
+    public String getGovernment(LocalDate when) {
         return getEventData(when, government, new EventGetter<String>() {
             @Override public String get(PlanetaryEvent e) { return e.government; }
         });
     }
 
-    public Integer getControlRating(DateTime when) {
+    public Integer getControlRating(LocalDate when) {
         return getEventData(when, controlRating, new EventGetter<Integer>() {
             @Override public Integer get(PlanetaryEvent e) { return e.controlRating; }
         });
     }
     
-    public String getControlRatingString(DateTime when) {
+    public String getControlRatingString(LocalDate when) {
         Integer cr = getControlRating(when);
         return (null != cr) ? StarUtil.getControlRatingString(cr.intValue()) : "actual situation unclear";
     }
     
-    public LifeForm getLifeForm(DateTime when) {
+    public LifeForm getLifeForm(LocalDate when) {
         return getEventData(when, null != lifeForm ? lifeForm : LifeForm.NONE, new EventGetter<LifeForm>() {
             @Override public LifeForm get(PlanetaryEvent e) { return e.lifeForm; }
         });
     }
 
-    public String getLifeFormName(DateTime when) {
+    public String getLifeFormName(LocalDate when) {
         return getLifeForm(when).name;
     }
 
-    public Climate getClimate(DateTime when) {
+    public Climate getClimate(LocalDate when) {
         return getEventData(when, climate, new EventGetter<Climate>() {
             @Override public Climate get(PlanetaryEvent e) { return e.climate; }
         });
     }
 
-    public String getClimateName(DateTime when) {
+    public String getClimateName(LocalDate when) {
         Climate c = getClimate(when);
         return null != c ? c.climateName : null;
     }
 
-    public Integer getPercentWater(DateTime when) {
+    public Integer getPercentWater(LocalDate when) {
         return getEventData(when, percentWater, new EventGetter<Integer>() {
             @Override public Integer get(PlanetaryEvent e) { return e.percentWater; }
         });
     }
 
-    public Integer getTemperature(DateTime when) {
+    public Integer getTemperature(LocalDate when) {
         return getEventData(when, temperature, new EventGetter<Integer>() {
             @Override public Integer get(PlanetaryEvent e) { return e.temperature; }
         });
     }
     
-    public Integer getPressure(DateTime when) {
+    public Integer getPressure(LocalDate when) {
         return getEventData(when, pressure, new EventGetter<Integer>() {
             @Override public Integer get(PlanetaryEvent e) { return e.pressure; }
         });
     }
     
-    public String getPressureName(DateTime when) {
+    public String getPressureName(LocalDate when) {
         Integer currentPressure = getPressure(when);
         return null != currentPressure ? PlanetaryConditions.getAtmosphereDisplayableName(currentPressure) : "unknown";
     }
 
-    public Double getPressureAtm(DateTime when) {
+    public Double getPressureAtm(LocalDate when) {
         return getEventData(when, pressureAtm, new EventGetter<Double>() {
             @Override public Double get(PlanetaryEvent e) { return e.pressureAtm; }
         });
     }
 
-    public Double getAtmMass(DateTime when) {
+    public Double getAtmMass(LocalDate when) {
         return getEventData(when, atmMass, new EventGetter<Double>() {
             @Override public Double get(PlanetaryEvent e) { return e.atmMass; }
         });
     }
 
-    public String getAtmosphere(DateTime when) {
+    public String getAtmosphere(LocalDate when) {
         return getEventData(when, atmosphere, new EventGetter<String>() {
             @Override public String get(PlanetaryEvent e) { return e.atmosphere; }
         });
     }
 
-    public Double getAlbedo(DateTime when) {
+    public Double getAlbedo(LocalDate when) {
         return getEventData(when, albedo, new EventGetter<Double>() {
             @Override public Double get(PlanetaryEvent e) { return e.albedo; }
         });
     }
 
-    public Double getGreenhouseEffect(DateTime when) {
+    public Double getGreenhouseEffect(LocalDate when) {
         return getEventData(when, greenhouseEffect, new EventGetter<Double>() {
             @Override public Double get(PlanetaryEvent e) { return e.greenhouseEffect; }
         });
     }
 
-    public Integer getHabitability(DateTime when) {
+    public Integer getHabitability(LocalDate when) {
         return getEventData(when, habitability, new EventGetter<Integer>() {
             @Override public Integer get(PlanetaryEvent e) { return e.habitability; }
         });
     }
 
-    public List<String> getFactions(DateTime when) {
+    public List<String> getFactions(LocalDate when) {
         List<String> retVal = getEventData(when, factions, new EventGetter<List<String>>() {
             @Override public List<String> get(PlanetaryEvent e) { return e.faction; }
         });
@@ -769,34 +765,34 @@ public class Planet implements Serializable {
     }
 
     /** @return set of factions at a given date */
-    public Set<Faction> getFactionSet(DateTime when) {
+    public Set<Faction> getFactionSet(LocalDate when) {
         List<String> currentFactions = getFactions(when);
         return getFactionsFrom(currentFactions);
     }
 
-    public String getShortDesc(DateTime when) {
+    public String getShortDesc(LocalDate when) {
         return getShortName(when) + " (" + getFactionDesc(when) + ")"; //$NON-NLS-1$ //$NON-NLS-2$
     }
 
-    public String getFactionDesc(DateTime when) {
+    public String getFactionDesc(LocalDate when) {
         return Faction.getFactionNames(getFactionSet(when), when.getYear());
     }
 
     // Stellar event data, to be moved
     
-    public Boolean isNadirCharge(DateTime when) {
+    public Boolean isNadirCharge(LocalDate when) {
         return getEventData(when, nadirCharge, new EventGetter<Boolean>() {
             @Override public Boolean get(PlanetaryEvent e) { return e.nadirCharge; }
         });
     }
 
-    public boolean isZenithCharge(DateTime when) {
+    public boolean isZenithCharge(LocalDate when) {
         return getEventData(when, zenithCharge, new EventGetter<Boolean>() {
             @Override public Boolean get(PlanetaryEvent e) { return e.zenithCharge; }
         });
     }
 
-    public String getRechargeStationsText(DateTime when) {
+    public String getRechargeStationsText(LocalDate when) {
         Boolean nadir = isNadirCharge(when);
         Boolean zenith = isZenithCharge(when);
         if(null != nadir && null != zenith && nadir.booleanValue() && zenith.booleanValue()) {
@@ -811,7 +807,7 @@ public class Planet implements Serializable {
     }
     
     /** Recharge time in hours (assuming the usage of the fastest charing method available) */
-    public double getRechargeTime(DateTime when) {
+    public double getRechargeTime(LocalDate when) {
         if(isZenithCharge(when) || isNadirCharge(when)) {
             return Math.min(176.0, 141 + 10*spectralClass + subtype);
         } else {
@@ -827,7 +823,7 @@ public class Planet implements Serializable {
         return StarUtil.getSolarRechargeTime(spectralClass, subtype);
     }
 
-    public String getRechargeTimeText(DateTime when) {
+    public String getRechargeTimeText(LocalDate when) {
         double time = getRechargeTime(when);
         if(Double.isInfinite(time)) {
             return "recharging impossible"; //$NON-NLS-1$
@@ -898,7 +894,7 @@ public class Planet implements Serializable {
         }        
         
         // Fill up events
-        events = new TreeMap<DateTime, PlanetaryEvent>(DateTimeComparator.getDateOnlyInstance());
+        events = new TreeMap<LocalDate, PlanetaryEvent>();
         if( null != eventList ) {
             for( PlanetaryEvent event : eventList ) {
                 if( null != event && null != event.date ) {
@@ -991,11 +987,11 @@ public class Planet implements Serializable {
                         // before the next "other" event, then we
                         int nextEventIndex = eventIndex + 1;                        
                         PlanetaryEvent nextEvent = nextEventIndex < tsvPlanet.getEvents().size() ? tsvPlanet.getEvents().get(nextEventIndex) : null;
-                        DateTime nextEventDate; 
+                        LocalDate nextEventDate; 
                         
                         // if we're at the last event, then just check that the planet doesn't have a faction in the year 3600
                         if(nextEvent == null) {
-                            nextEventDate = new DateTime(3600, 1, 1, 0, 0, 1, 0);
+                            nextEventDate = LocalDate.of(3600, 1, 1);
                         } else {
                             nextEventDate = nextEvent.date;
                         }
@@ -1284,7 +1280,7 @@ public class Planet implements Serializable {
     @XmlRootElement(name="event")
     public static final class PlanetaryEvent {
         @XmlJavaTypeAdapter(DateAdapter.class)
-        public DateTime date;
+        public LocalDate date;
         public String message;
         public String name;
         public String shortName;
@@ -1382,7 +1378,7 @@ public class Planet implements Serializable {
     
     public static final class FactionChange {
         @XmlJavaTypeAdapter(DateAdapter.class)
-        public DateTime date;
+        public LocalDate date;
         @XmlJavaTypeAdapter(StringListAdapter.class)
         public List<String> faction;
         

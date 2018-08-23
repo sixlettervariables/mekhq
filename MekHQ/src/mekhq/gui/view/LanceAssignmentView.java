@@ -235,7 +235,7 @@ public class LanceAssignmentView extends JPanel {
 		ArrayList<AtBContract> activeContracts = new ArrayList<AtBContract>();
 		for (Mission m : campaign.getMissions()) {
 			if (m instanceof AtBContract && m.isActive() &&
-					!((AtBContract)m).getStartDate().after(campaign.getDate())) {
+					!((AtBContract)m).getStartDate().isAfter(campaign.getDate())) {
 				activeContracts.add((AtBContract)m);
 				cbContract.addItem((AtBContract)m);
 			}

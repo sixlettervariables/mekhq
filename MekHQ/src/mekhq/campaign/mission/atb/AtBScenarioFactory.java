@@ -1,9 +1,9 @@
 package mekhq.campaign.mission.atb;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -77,7 +77,7 @@ public class AtBScenarioFactory {
 		return scenarioMap.get(type);
 	}
 	
-	public static AtBScenario createScenario(Campaign c, Lance lance, int type, boolean attacker, Date date) {
+	public static AtBScenario createScenario(Campaign c, Lance lance, int type, boolean attacker, LocalDate date) {
 		List<Class<IAtBScenario>> classList = getScenarios(type);
 		Class<IAtBScenario> selectedClass = null;
 
@@ -177,7 +177,7 @@ public class AtBScenarioFactory {
 			
 			if (null == l.getContract(c) || !l.getContract(c).isActive() ||
 					!l.isEligible(c) ||
-					c.getDate().before(l.getContract(c).getStartDate())) {
+					c.getDate().isBefore(l.getContract(c).getStartDate())) {
 				continue;
 			}
 			
@@ -256,7 +256,7 @@ public class AtBScenarioFactory {
     				if (lList.size() > 0) {
     					Lance lance = Utilities.getRandomItem(lList);
     					AtBScenario scenario = AtBScenarioFactory.createScenario(c, lance, AtBScenario.BASEATTACK, false,
-    							Lance.getBattleDate(c.calendar));
+    							Lance.getBattleDate(c.getDate()));
     					for (int i = 0; i < sList.size(); i++) {
     						if (sList.get(i).getLanceForceId() ==
     								lance.getForceId()) {

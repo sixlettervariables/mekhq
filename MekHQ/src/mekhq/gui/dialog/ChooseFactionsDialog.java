@@ -7,6 +7,7 @@ import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -21,26 +22,24 @@ import javax.swing.JDialog;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 
-import org.joda.time.DateTime;
-
 import megamek.common.util.EncodeControl;
 import mekhq.campaign.universe.Faction;
 
 public class ChooseFactionsDialog extends JDialog {
     private static final long serialVersionUID = 805616085217507489L;
     
-    private DateTime date;
+    private LocalDate date;
     
     ResourceBundle resourceMap;
     private JList<Faction> factionList;
     private List<String> result;
     private boolean changed;
     
-    public ChooseFactionsDialog(Frame parent, DateTime date, List<String> defaults) {
+    public ChooseFactionsDialog(Frame parent, LocalDate date, List<String> defaults) {
         this(parent, date, defaults, true);
     }
     
-    public ChooseFactionsDialog(Frame parent, DateTime date, List<String> defaults, boolean modal) {
+    public ChooseFactionsDialog(Frame parent, LocalDate date, List<String> defaults, boolean modal) {
         super(parent, modal);
         this.date = Objects.requireNonNull(date);
         this.result = defaults;
@@ -130,7 +129,7 @@ public class ChooseFactionsDialog extends JDialog {
         private TreeMap<String, Faction> factionMap = new TreeMap<>();
         private List<String> names;
         
-        public FactionListModel(DateTime date) {
+        public FactionListModel(LocalDate date) {
             for(Faction faction : Faction.getFactions()) {
                 factionMap.put(faction.getFullName(date.getYear()), faction);
             }

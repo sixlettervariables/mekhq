@@ -23,9 +23,9 @@ package mekhq.campaign;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
-import org.joda.time.DateTime;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -99,7 +99,7 @@ public class JumpPath implements Serializable {
 		return endTime;
 	}
 	
-	public double getTotalRechargeTime(DateTime when) {
+	public double getTotalRechargeTime(LocalDate when) {
 		int rechargeTime = 0;
 		for(Planet planet : path) {
 			if(planet.equals(getFirstPlanet())) {
@@ -117,7 +117,7 @@ public class JumpPath implements Serializable {
 		return size()-1;
 	}
 	
-	public double getTotalTime(DateTime when, double currentTransit) {	
+	public double getTotalTime(LocalDate when, double currentTransit) {	
 		return getTotalRechargeTime(when) + getStartTime(currentTransit) + getEndTime();
 	}
 	

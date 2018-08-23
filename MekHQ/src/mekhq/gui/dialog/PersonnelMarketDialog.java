@@ -9,6 +9,7 @@ package mekhq.gui.dialog;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.GregorianCalendar;
 import java.util.ResourceBundle;
@@ -163,7 +164,7 @@ public class PersonnelMarketDialog extends JDialog {
         	boolean activeContract = false;
         	for (Mission m : campaign.getMissions()) {
         		if (m.isActive() && m instanceof mekhq.campaign.mission.Contract &&
-        				((mekhq.campaign.mission.Contract)m).getStartDate().before(campaign.getDate())) {
+        				((mekhq.campaign.mission.Contract)m).getStartDate().isBefore(campaign.getDate())) {
         			activeContract = true;
         			break;
         		}
@@ -323,7 +324,7 @@ public class PersonnelMarketDialog extends JDialog {
 	    		if(campaign.recruitPerson(selectedPerson)) {
 	    			Entity en = personnelMarket.getAttachedEntity(pid);
 	    			if (campaign.getCampaignOptions().getUseTimeInService()) {
-                        GregorianCalendar rawrecruit = (GregorianCalendar) campaign.getCalendar().clone();
+                        LocalDate rawrecruit = campaign.getDate();
                         selectedPerson.setRecruitment(rawrecruit);
                     }
 	    			if (null != en) {
@@ -346,7 +347,7 @@ public class PersonnelMarketDialog extends JDialog {
 		    	campaign.addPersonWithoutId(selectedPerson, true);
 				addUnit(en, false);
                 if (campaign.getCampaignOptions().getUseTimeInService()) {
-                    GregorianCalendar rawrecruit = (GregorianCalendar) campaign.getCalendar().clone();
+                    LocalDate rawrecruit = campaign.getDate();
                     selectedPerson.setRecruitment(rawrecruit);
                 }
 		    	personnelMarket.removePerson(selectedPerson);
@@ -362,8 +363,7 @@ public class PersonnelMarketDialog extends JDialog {
 			return;
 		}
 		if (pay && !campaign.getFinances().debit(unitCost, Transaction.C_UNIT,
-				"Purchased " + en.getShortName(),
-				campaign.getCalendar().getTime())) {
+				"Purchased " + en.getShortName(), campaign.getDate())) {
 			return;
 		}
 		campaign.addUnit(en, false, 0);

@@ -18,7 +18,7 @@
  */
 package mekhq.campaign.handler;
 
-import java.util.Calendar;
+import java.time.DayOfWeek;
 
 import megamek.common.Compute;
 import megamek.common.event.Subscribe;
@@ -45,7 +45,7 @@ public class XPHandler {
     @Subscribe
     public void processAdminXP(NewDayEvent event) {
         final Campaign campaign = event.getCampaign();
-        if((adminXP <= 0) || (campaign.getCalendar().get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY)) {
+        if((adminXP <= 0) || (campaign.getDate().getDayOfWeek() != DayOfWeek.MONDAY)) {
             return;
         }
         for (Person person : campaign.getAdmins()) {

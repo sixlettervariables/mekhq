@@ -10,6 +10,7 @@ import java.awt.BorderLayout;
 import java.util.GregorianCalendar;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.time.LocalDate;
 import java.util.ResourceBundle;
 
 import javax.swing.DefaultComboBoxModel;
@@ -159,7 +160,7 @@ public class NewRecruitDialog extends javax.swing.JDialog {
     private void hire() {
         if (hqView.getCampaign().recruitPerson(person)) {
             if (hqView.getCampaign().getCampaignOptions().getUseTimeInService()) {
-                GregorianCalendar rawrecruit = (GregorianCalendar) hqView.getCampaign().getCalendar().clone();
+                LocalDate rawrecruit = hqView.getCampaign().getDate();
                 person.setRecruitment(rawrecruit);
             }
             person = hqView.getCampaign().newPerson(person.getPrimaryRole());

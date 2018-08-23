@@ -23,9 +23,9 @@ package mekhq.campaign.mission;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 
-import org.joda.time.DateTime;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -131,7 +131,7 @@ public class Mission implements Serializable, MekHqXmlSerializable {
      * in which case we return whatever was stored.
      * @return
      */
-    public String getPlanetName(DateTime when) {
+    public String getPlanetName(LocalDate when) {
         if(getPlanet() == null) {
             return legacyPlanetName;
         }

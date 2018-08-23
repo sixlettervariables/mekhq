@@ -23,7 +23,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -40,6 +40,8 @@ import mekhq.campaign.mission.Contract;
  */
 public class ContractViewPanel extends JPanel {
     private static final long serialVersionUID = 7004741688464105277L;
+
+    private DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
     private Contract contract;
     
@@ -123,8 +125,6 @@ public class ContractViewPanel extends JPanel {
 
         GridBagConstraints gridBagConstraints;
         pnlStats.setLayout(new GridBagLayout());
-        
-        SimpleDateFormat shortDateFormat = new SimpleDateFormat("MM/dd/yyyy");
         
         lblStatus.setName("lblOwner"); // NOI18N
         lblStatus.setText("<html><b>" + contract.getStatusName() + "</b></html>");

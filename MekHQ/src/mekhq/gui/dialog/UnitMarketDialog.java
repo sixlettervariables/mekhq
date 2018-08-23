@@ -352,12 +352,12 @@ public class UnitMarketDialog extends JDialog {
 			if (offer.market == UnitMarket.MARKET_BLACK && roll <= 2) {
 				campaign.getFinances().debit(cost / roll, Transaction.C_UNIT,
 						"Purchased " + selectedEntity.getShortName() + " (lost on black market)",
-						campaign.getCalendar().getTime());
+						campaign.getDate());
 				campaign.addReport("<font color='red'>Swindled! Money was paid, but no unit delivered.</font>");
 			} else {
 				campaign.getFinances().debit(cost, Transaction.C_UNIT,
 						"Purchased " + selectedEntity.getShortName(),
-						campaign.getCalendar().getTime());
+						campaign.getDate());
 				campaign.addUnit(selectedEntity, false, transitDays);
 				if (!campaign.getCampaignOptions().getInstantUnitMarketDelivery()) {
 					campaign.addReport("<font color='green'>Unit will be delivered in " + transitDays + " days.</font>");

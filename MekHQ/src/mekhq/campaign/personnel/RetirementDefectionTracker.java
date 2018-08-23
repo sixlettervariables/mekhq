@@ -24,10 +24,9 @@ package mekhq.campaign.personnel;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Enumeration;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -65,7 +64,7 @@ public class RetirementDefectionTracker implements Serializable, MekHqXmlSeriali
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 7245317499458320654L;
+	private static final long serialVersionUID = 2L;
 	
 	/* In case the dialog is closed after making the retirement rolls
 	 * and determining payouts but before the retirees have been paid,
@@ -74,13 +73,12 @@ public class RetirementDefectionTracker implements Serializable, MekHqXmlSeriali
 	private HashSet<Integer> rollRequired;
 	private HashMap<Integer, HashSet<UUID>> unresolvedPersonnel;
 	private HashMap<UUID, Payout> payouts;
-	private GregorianCalendar lastRetirementRoll;
+	private LocalDate lastRetirementRoll;
 	
 	public RetirementDefectionTracker() {
 		rollRequired = new HashSet<Integer>();
 		unresolvedPersonnel = new HashMap<Integer, HashSet<UUID>>();
 		payouts = new HashMap<UUID, Payout>();
-		lastRetirementRoll = new GregorianCalendar();
 	}
 
 	/**
@@ -227,7 +225,7 @@ public class RetirementDefectionTracker implements Serializable, MekHqXmlSeriali
     	            }
     	        }
     		}
-    		if (p.getAge(campaign.getCalendar()) >= 50) {
+    		if (p.getAge(campaign.getDate()) >= 50) {
     			target.addModifier(1, "Over 50");
     		}
     		if (campaign.getCampaignOptions().getUseShareSystem()) {
@@ -302,15 +300,15 @@ public class RetirementDefectionTracker implements Serializable, MekHqXmlSeriali
     	if (null != contract) {
     		rollRequired.remove(contract.getId());
     	}
-    	lastRetirementRoll.setTime(campaign.getDate());
+    	lastRetirementRoll = campaign.getDate();
     }
     
-    public GregorianCalendar getLastRetirementRoll() {
+    public LocalDate getLastRetirementRoll() {
     	return lastRetirementRoll;
     }
     
-    public void setLastRetirementRoll(GregorianCalendar cal) {
-    	lastRetirementRoll.setTime(cal.getTime());
+    public void setLastRetirementRoll(LocalDate d) {
+    	lastRetirementRoll = d;
     }
     
     /**
@@ -630,9 +628,8 @@ public class RetirementDefectionTracker implements Serializable, MekHqXmlSeriali
         pw1.println(MekHqXmlUtil.indentStr(indent + 1)
         		+ "</payouts>");
 
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         MekHqXmlUtil.writeSimpleXmlTag(pw1, indent + 1,
-        		"lastRetirementRoll", df.format(lastRetirementRoll.getTime()));
+        		"lastRetirementRoll", MekHqXmlUtil.formatDate(lastRetirementRoll));
         pw1.println(MekHqXmlUtil.indentStr(indent) + "</retirementDefectionTracker>");		
 	}
 
@@ -717,8 +714,7 @@ public class RetirementDefectionTracker implements Serializable, MekHqXmlSeriali
                 		}
                 	}
                 } else if (wn2.getNodeName().equalsIgnoreCase("lastRetirementRoll")) {
-                    SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-                    retVal.lastRetirementRoll.setTime(df.parse(wn2.getTextContent().trim()));
+                    retVal.lastRetirementRoll = MekHqXmlUtil.parseDate(wn2.getTextContent());
                 }
             }
         } catch (Exception ex) {

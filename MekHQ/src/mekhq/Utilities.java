@@ -36,13 +36,10 @@ import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Enumeration;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -1262,73 +1259,6 @@ public class Utilities {
             }
         }
         //TODO: Is it necessary to update armor?
-    }
-
-    public static int getDaysBetween(Date date1, Date date2) {
-        return (int) ((date2.getTime() - date1.getTime()) / MILLISECONDS_IN_DAY );
-    }
-
-    /**
-     * Calculates the number of days between start and end dates, taking
-     * into consideration leap years, year boundaries etc.
-     *
-     * @param start the start date
-     * @param end the end date, must be later than the start date
-     * @return the number of days between the start and end dates
-     */
-    public static long countDaysBetween(Date start, Date end) {
-        if (end.before(start)) {
-            throw new IllegalArgumentException("The end date must be later than the start date");
-        }
-
-        //reset all hours mins and secs to zero on start date
-        Calendar startCal = GregorianCalendar.getInstance();
-        startCal.setTime(start);
-        startCal.set(Calendar.HOUR_OF_DAY, 0);
-        startCal.set(Calendar.MINUTE, 0);
-        startCal.set(Calendar.SECOND, 0);
-        long startTime = startCal.getTimeInMillis();
-
-        //reset all hours mins and secs to zero on end date
-        Calendar endCal = GregorianCalendar.getInstance();
-        endCal.setTime(end);
-        endCal.set(Calendar.HOUR_OF_DAY, 0);
-        endCal.set(Calendar.MINUTE, 0);
-        endCal.set(Calendar.SECOND, 0);
-        long endTime = endCal.getTimeInMillis();
-
-        return (endTime - startTime) / MILLISECONDS_IN_DAY;
-    }
-
-    public static int getDiffFullYears(Date date, GregorianCalendar b) {
-        GregorianCalendar a = new GregorianCalendar();
-        a.setTime(date);
-        int diff = b.get(GregorianCalendar.YEAR) - a.get(GregorianCalendar.YEAR);
-        if (a.get(GregorianCalendar.MONTH) > b.get(GregorianCalendar.MONTH) ||
-            (a.get(GregorianCalendar.MONTH) == b.get(GregorianCalendar.MONTH) && a.get(GregorianCalendar.DATE) > b.get(GregorianCalendar.DATE))) {
-            diff--;
-        }
-        return diff;
-    }
-
-    public static int getDiffPartialYears(Date date, GregorianCalendar b) {
-        GregorianCalendar a = new GregorianCalendar();
-        a.setTime(date);
-        int diff = b.get(GregorianCalendar.YEAR) - a.get(GregorianCalendar.YEAR);
-        if (diff == 0 && countDaysBetween(a.getTime(), b.getTime()) > 0) {
-            return 1;
-        }
-        return diff;
-    }
-
-    /** @return the current date as a DateTime time stamp for midnight in UTC time zone */
-    public static DateTime getDateTimeDay(Calendar cal) {
-        return new LocalDateTime(cal).toDateTime(DateTimeZone.UTC);
-    }
-    
-    /** @return the current date as a DateTime time stamp for midnight in UTC time zone */
-    public static DateTime getDateTimeDay(Date date) {
-        return new LocalDateTime(date).toDateTime(DateTimeZone.UTC);
     }
 
     /**

@@ -23,12 +23,10 @@ package mekhq.campaign.force;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.UUID;
 
 import megamek.common.Compute;
@@ -322,10 +320,8 @@ public class Lance implements Serializable, MekHqXmlSerializable {
         return null;
     }
 
-    public static Date getBattleDate(GregorianCalendar c) {
-        GregorianCalendar calendar = (GregorianCalendar)c.clone();
-        calendar.add(Calendar.DATE, Compute.randomInt(7));
-        return calendar.getTime();
+    public static LocalDate getBattleDate(LocalDate d) {
+        return d.plusDays(Compute.randomInt(7));
     }
 
     public AtBScenario checkForBattle(Campaign c) {
@@ -341,33 +337,33 @@ public class Lance implements Serializable, MekHqXmlSerializable {
             if (roll < 1) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.BASEATTACK, false,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 9) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.BREAKTHROUGH, true,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 9 + noBattle) {
                 return null;
             } else if (roll < 17 + noBattle) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.STANDUP, true,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 25 + noBattle) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.STANDUP, false,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 33 + noBattle) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.CHASE, false,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 41 + noBattle) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.HOLDTHELINE, true,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.BASEATTACK, true,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             }
         case Lance.ROLE_SCOUT:
             noBattle = (int)(40.0 / c.getCampaignOptions().getIntensity() + 0.5);
@@ -375,33 +371,33 @@ public class Lance implements Serializable, MekHqXmlSerializable {
             if (roll < 1) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.BASEATTACK, false,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 11) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.CHASE, true,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 21) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.HIDEANDSEEK, true,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 31) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.PROBE, true,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 41) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.PROBE, false,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 41 + noBattle) {
                 return null;
             } else if (roll < 51 + noBattle) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.EXTRACTION, true,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.RECONRAID, true,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             }
         case Lance.ROLE_DEFEND:
             noBattle = (int)(80.0 / c.getCampaignOptions().getIntensity() + 0.5);
@@ -409,29 +405,29 @@ public class Lance implements Serializable, MekHqXmlSerializable {
             if (roll < 1) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.BASEATTACK, false,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 5) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.HOLDTHELINE, false,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 9) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.RECONRAID, false,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 13) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.EXTRACTION, false,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 13 + noBattle) {
                 return null;
             } else if (roll < 17 + noBattle) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.HIDEANDSEEK, true,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.BREAKTHROUGH, false,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             }
         case Lance.ROLE_TRAINING:
             noBattle = (int)(90.0 / c.getCampaignOptions().getIntensity() + 0.5);
@@ -439,29 +435,29 @@ public class Lance implements Serializable, MekHqXmlSerializable {
             if (roll < 1) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.BASEATTACK, false,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 3) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.HOLDTHELINE, false,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 5) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.BREAKTHROUGH, true,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 7) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.CHASE, true,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 9) {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.HIDEANDSEEK, false,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             } else if (roll < 9 + noBattle) {
                 return null;
             } else {
                 return AtBScenarioFactory.createScenario(c, this,
                         AtBScenario.CHASE, false,
-                        getBattleDate(c.getCalendar()));
+                        getBattleDate(c.getDate()));
             }
         default:
             return null;

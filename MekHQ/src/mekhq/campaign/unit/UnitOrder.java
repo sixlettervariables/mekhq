@@ -302,7 +302,7 @@ public class UnitOrder extends Unit implements IAcquisitionWork, MekHqXmlSeriali
         }
         //parts need to be initialized for this to work
         int avail = getAvailability();
-        if(this.isExtinctIn(campaign.getCalendar().get(Calendar.YEAR))) {
+        if(this.isExtinctIn(campaign.getGameYear())) {
         	avail = EquipmentType.RATING_X;
         }
         int availabilityMod = Availability.getAvailabilityModifier(avail);

@@ -30,15 +30,16 @@ import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.Enumeration;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -51,12 +52,10 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
-import java.util.concurrent.TimeUnit;
 
 import javax.swing.JOptionPane;
 import javax.xml.parsers.DocumentBuilder;
 
-import org.joda.time.DateTime;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -229,7 +228,7 @@ import mekhq.module.atb.AtBEventProcessor;
 public class Campaign implements Serializable, ITechManager {
     private static final String REPORT_LINEBREAK = "<br/><br/>"; //$NON-NLS-1$
 
-    private static final long serialVersionUID = -6312434701389973056L;
+    private static final long serialVersionUID = 2L;
 
     private UUID id;
 
@@ -276,9 +275,9 @@ public class Campaign implements Serializable, ITechManager {
     private Hashtable<Integer, Lance> lances; //AtB
 
     // calendar stuff
-    public GregorianCalendar calendar;
-    private SimpleDateFormat dateFormat;
-    private SimpleDateFormat shortDateFormat;
+    public LocalDate calendar;
+    private DateTimeFormatter dateFormat;
+    private DateTimeFormatter shortDateFormat;
 
     private String factionCode;
     private int techFactionCode;
@@ -324,10 +323,10 @@ public class Campaign implements Serializable, ITechManager {
     private int fatigueLevel; //AtB
     private AtBConfiguration atbConfig; //AtB
     private AtBEventProcessor atbEventProcessor; //AtB
-    private Calendar shipSearchStart; //AtB
+    private LocalDate shipSearchStart; //AtB
     private int shipSearchType;
     private String shipSearchResult; //AtB
-    private Calendar shipSearchExpiration; //AtB
+    private LocalDate shipSearchExpiration; //AtB
     private IUnitGenerator unitGenerator;
     private IUnitRating unitRating;
 
@@ -339,9 +338,9 @@ public class Campaign implements Serializable, ITechManager {
         currentReport = new ArrayList<String>();
         currentReportHTML = "";
         newReports = new ArrayList<String>();
-        calendar = new GregorianCalendar(3067, Calendar.JANUARY, 1);
-        dateFormat = new SimpleDateFormat("EEEE, MMMM d yyyy");
-        shortDateFormat = new SimpleDateFormat("yyyyMMdd");
+        calendar = LocalDate.of(3067, 1, 1);
+        dateFormat = DateTimeFormatter.ofPattern("EEEE, MMMM d yyyy");
+        shortDateFormat = DateTimeFormatter.ofPattern("yyyyMMdd");
         name = "My Campaign";
         rng = new RandomNameGenerator();
         rng.populateNames();
@@ -441,10 +440,6 @@ public class Campaign implements Serializable, ITechManager {
                 + getDateAsString() + " (" + getEraName() + ")";
     }
 
-    public GregorianCalendar getCalendar() {
-        return calendar;
-    }
-
     public RandomNameGenerator getRNG() {
         return rng;
     }
@@ -454,7 +449,7 @@ public class Campaign implements Serializable, ITechManager {
     }
 
     public String getCurrentPlanetName() {
-        return location.getCurrentPlanet().getPrintableName(Utilities.getDateTimeDay(calendar));
+        return location.getCurrentPlanet().getPrintableName(getDate());
     }
 
     public Planet getCurrentPlanet() {
@@ -567,7 +562,7 @@ public class Campaign implements Serializable, ITechManager {
      * 
      * @return The date a ship search was started, or null if none is in progress.
      */
-    public Calendar getShipSearchStart() {
+    public LocalDate getShipSearchStart() {
         return shipSearchStart;
     }
 
@@ -583,12 +578,12 @@ public class Campaign implements Serializable, ITechManager {
      * 
      * @return The date the ship is no longer available, if there is one.
      */
-    public Calendar getShipSearchExpiration() {
+    public LocalDate getShipSearchExpiration() {
         return shipSearchExpiration;
     }
 
     public void startShipSearch(int unitType) {
-        shipSearchStart = (Calendar) calendar.clone();
+        shipSearchStart = getDate();
         shipSearchType = unitType;
     }
 
@@ -609,7 +604,7 @@ public class Campaign implements Serializable, ITechManager {
             shipSearchStart = null;
             return;
         }
-        long numDays = TimeUnit.MILLISECONDS.toDays(calendar.getTimeInMillis() - shipSearchStart.getTimeInMillis());
+        long numDays = getDate().toEpochDay() - shipSearchStart.toEpochDay();
         if (numDays > 21) {
             int roll = Compute.d6(2);
             TargetRoll target = getAtBConfig().shipSearchTargetRoll(shipSearchType, this);
@@ -620,17 +615,16 @@ public class Campaign implements Serializable, ITechManager {
             if (roll >= target.getValue()) {
                 report.append("<br/>Search successful. ");
                 MechSummary ms = unitGenerator.generate(factionCode, shipSearchType, -1,
-                        getCalendar().get(Calendar.YEAR), getUnitRatingMod());
+                        getDate().getYear(), getUnitRatingMod());
                 if (ms == null) {
                     ms = getAtBConfig().findShip(shipSearchType);
                 }
                 if (ms != null) {
                     shipSearchResult = ms.getName();
-                    shipSearchExpiration = (Calendar) getCalendar().clone();
-                    shipSearchExpiration.add(Calendar.DAY_OF_MONTH, 31);
+                    shipSearchExpiration = getDate().plusMonths(1);
                     report.append(shipSearchResult).append(" is available for purchase for ")
                             .append(NumberFormat.getInstance().format(ms.getCost())).append(" C-bills until ")
-                            .append(dateFormat.format(shipSearchExpiration.getTime()));
+                            .append(shipSearchExpiration.format(dateFormat));
                 } else {
                     report.append(" <font color=\"red\">Could not determine ship type.</font>");
                 }
@@ -670,7 +664,7 @@ public class Campaign implements Serializable, ITechManager {
         int transitDays = getCampaignOptions().getInstantUnitMarketDelivery() ? 0
                 : calculatePartTransitTime(Compute.d6(2) - 2);
 
-        getFinances().debit(cost, Transaction.C_UNIT, "Purchased " + en.getShortName(), getCalendar().getTime());
+        getFinances().debit(cost, Transaction.C_UNIT, "Purchased " + en.getShortName(), getDate());
         addUnit(en, true, transitDays);
         if (!getCampaignOptions().getInstantUnitMarketDelivery()) {
             addReport("<font color='green'>Unit will be delivered in " + transitDays + " days.</font>");
@@ -1107,7 +1101,7 @@ public class Campaign implements Serializable, ITechManager {
         // Only pay if option set and this isn't a prisoner or bondsman
         if (getCampaignOptions().payForRecruitment() && !prisoner) {
             if (!getFinances().debit(2 * p.getSalary(), Transaction.C_SALARY,
-                    "recruitment of " + p.getFullName(), getCalendar().getTime())) {
+                    "recruitment of " + p.getFullName(), getDate())) {
                 addReport("<font color='red'><b>Insufficient funds to recruit "
                         + p.getFullName() + "</b></font>");
                 return false;
@@ -1192,8 +1186,12 @@ public class Campaign implements Serializable, ITechManager {
         p.addLogEntry(getDate(), "Joined " + getName() + rankEntry);
     }
 
-    public Date getDate() {
-        return calendar.getTime();
+    public void setDate(LocalDate d) {
+        calendar = d;
+    }
+
+    public LocalDate getDate() {
+        return calendar;
     }
 
     public Collection<Person> getPersonnel() {
@@ -2210,7 +2208,7 @@ public class Campaign implements Serializable, ITechManager {
                     && !(partWork instanceof Armor)) {
                 int cost = (int) (((Part) partWork).getStickerPrice() * .2);
                 report += "<br>Repairs cost " + cost + " C-bills worth of parts.";
-                finances.debit(cost, Transaction.C_REPAIRS, "Repair of " + partWork.getPartName(), calendar.getTime());
+                finances.debit(cost, Transaction.C_REPAIRS, "Repair of " + partWork.getPartName(), getDate());
             }
             if (roll == 12 && target.getValue() != TargetRoll.AUTOMATIC_SUCCESS) {
                 xpGained += getCampaignOptions().getSuccessXP();
@@ -2270,7 +2268,7 @@ public class Campaign implements Serializable, ITechManager {
      */
     public void readNews() {
         //read the news
-        DateTime now = Utilities.getDateTimeDay(calendar);
+        LocalDate now = getDate();
         for(NewsItem article : news.fetchNewsFor(now)) {
             addReport(article.getHeadlineForReport());
         }
@@ -2299,7 +2297,7 @@ public class Campaign implements Serializable, ITechManager {
     
     private void processNewDayATBScenarios() {
         for (Mission m : getMissions()) {
-            if (!m.isActive() || !(m instanceof AtBContract) || getDate().before(((Contract) m).getStartDate())) {
+            if (!m.isActive() || !(m instanceof AtBContract) || getDate().isBefore(((Contract) m).getStartDate())) {
                 continue;
             }
             /*
@@ -2315,16 +2313,15 @@ public class Campaign implements Serializable, ITechManager {
                  * transitTime is measured in days; round up to the next whole day, then convert
                  * to milliseconds
                  */
-                GregorianCalendar cal = (GregorianCalendar) calendar.clone();
-                cal.add(Calendar.DATE, (int) Math.ceil(getLocation().getTransitTime()));
-                ((AtBContract) m).getStartDate().setTime(cal.getTimeInMillis());
-                cal.add(Calendar.MONTH, ((AtBContract) m).getLength());
-                ((AtBContract) m).getEndingDate().setTime(cal.getTimeInMillis());
+                LocalDate start = getDate().plusDays((int)Math.ceil(getLocation().getTransitTime()));
+                LocalDate end = start.plusMonths(((AtBContract) m).getLength());
+                ((AtBContract) m).setStartDate(start);
+                ((AtBContract) m).setEndingDate(end);
                 addReport(
                         "The start and end dates of " + m.getName() + " have been shifted to reflect the current ETA.");
                 continue;
             }
-            if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+            if (getDate().getDayOfWeek() == DayOfWeek.MONDAY) {
                 int deficit = getDeploymentDeficit((AtBContract) m);
                 if (deficit > 0) {
                     ((AtBContract) m).addPlayerMinorBreaches(deficit);
@@ -2337,7 +2334,7 @@ public class Campaign implements Serializable, ITechManager {
                 if (!s.isCurrent() || !(s instanceof AtBScenario)) {
                     continue;
                 }
-                if (s.getDate().before(calendar.getTime())) {
+                if (s.getDate().isBefore(getDate())) {
                     s.setStatus(Scenario.S_DEFEAT);
                     s.clearAllForcesAndPersonnel(this);
                     ((AtBContract) m).addPlayerMinorBreach();
@@ -2348,19 +2345,19 @@ public class Campaign implements Serializable, ITechManager {
             }
         }
 
-        if (calendar.get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+        if (getDate().getDayOfWeek() == DayOfWeek.MONDAY) {
             AtBScenarioFactory.createScenariosForNewWeek(this, true);
         }
 
         for (Mission m : getMissions()) {
-            if (m.isActive() && m instanceof AtBContract && !((AtBContract) m).getStartDate().after(getDate())) {
+            if (m.isActive() && m instanceof AtBContract && !((AtBContract) m).getStartDate().isAfter(getDate())) {
                 ((AtBContract) m).checkEvents(this);
             }
             /*
              * If there is a standard battle set for today, deploy the lance.
              */
             for (Scenario s : m.getScenarios()) {
-                if (s.getDate() != null && s.getDate().equals(calendar.getTime())) {
+                if (s.getDate() != null && s.getDate().equals(getDate())) {
                     int forceId = ((AtBScenario) s).getLanceForceId();
                     if (null != lances.get(forceId) && !forceIds.get(forceId).isDeployed()) {
 
@@ -2395,7 +2392,7 @@ public class Campaign implements Serializable, ITechManager {
     private void processNewDayATBFatigue() {
         boolean inContract = false;
         for (Mission m : getMissions()) {
-            if (!m.isActive() || !(m instanceof AtBContract) || getDate().before(((Contract) m).getStartDate())) {
+            if (!m.isActive() || !(m instanceof AtBContract) || getDate().isBefore(((Contract) m).getStartDate())) {
                 continue;
             }
             switch (((AtBContract) m).getMissionType()) {
@@ -2432,7 +2429,7 @@ public class Campaign implements Serializable, ITechManager {
         contractMarket.generateContractOffers(this);
         unitMarket.generateUnitOffers(this);
 
-        if (shipSearchExpiration != null && !shipSearchExpiration.after(calendar)) {
+        if (shipSearchExpiration != null && !shipSearchExpiration.isAfter(getDate())) {
             shipSearchExpiration = null;
             if (shipSearchResult != null) {
                 addReport("Opportunity for purchase of " + shipSearchResult + " has expired.");
@@ -2440,12 +2437,12 @@ public class Campaign implements Serializable, ITechManager {
             }
         }
 
-        if (getCalendar().get(Calendar.DAY_OF_WEEK) == Calendar.MONDAY) {
+        if (getDate().getDayOfWeek() == DayOfWeek.MONDAY) {
             processShipSearch();
         }
 
         // Add or remove dependents
-        if (calendar.get(Calendar.DAY_OF_YEAR) == 1) {
+        if (getDate().getDayOfYear() == 1) {
             int numPersonnel = 0;
             ArrayList<Person> dependents = new ArrayList<Person>();
             for (Person p : getPersonnel()) {
@@ -2474,7 +2471,7 @@ public class Campaign implements Serializable, ITechManager {
             }
         }
 
-        if (calendar.get(Calendar.DAY_OF_MONTH) == 1) {
+        if (getDate().getDayOfMonth() == 1) {
             /*
              * First of the month; roll morale, track unit fatigue.
              */
@@ -2483,8 +2480,8 @@ public class Campaign implements Serializable, ITechManager {
             rating.reInitialize();
 
             for (Mission m : getMissions()) {
-                if (m.isActive() && m instanceof AtBContract && !((AtBContract) m).getStartDate().after(getDate())) {
-                    ((AtBContract) m).checkMorale(calendar, getUnitRatingMod());
+                if (m.isActive() && m instanceof AtBContract && !((AtBContract) m).getStartDate().isAfter(getDate())) {
+                    ((AtBContract) m).checkMorale(getDate(), getUnitRatingMod());
                     addReport("Enemy morale is now " + ((AtBContract) m).getMoraleLevelName() + " on contract "
                             + m.getName());
                 }
@@ -2510,7 +2507,7 @@ public class Campaign implements Serializable, ITechManager {
             if (p.isFemale()) {
                 if (p.isPregnant()) {
                     if (getCampaignOptions().useUnofficialProcreation()) {
-                        if (getCalendar().compareTo((p.getDueDate())) == 0) {
+                        if (getDate().isEqual(p.getDueDate())) {
                             babies.addAll(p.birth());
                         }
                     } else {
@@ -2548,7 +2545,7 @@ public class Campaign implements Serializable, ITechManager {
                 }
             }
 
-            if (getCampaignOptions().getIdleXP() > 0 && calendar.get(Calendar.DAY_OF_MONTH) == 1 && p.isActive()
+            if (getCampaignOptions().getIdleXP() > 0 && getDate().getDayOfMonth() == 1 && p.isActive()
                     && !p.isPrisoner()) { // Prisoners no
                                           // XP, Bondsmen
                                           // yes xp
@@ -2668,13 +2665,14 @@ public class Campaign implements Serializable, ITechManager {
             return false;
         }
 
-        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        setDate(getDate().plusDays(1));
+
         currentReport.clear();
         currentReportHTML = "";
         newReports.clear();
         beginReport("<b>" + getDateAsString() + "</b>");
 
-        if (calendar.get(Calendar.DAY_OF_YEAR) == 1) {
+        if (getDate().getDayOfYear() == 1) {
             reloadNews();
         }
 
@@ -2717,8 +2715,8 @@ public class Campaign implements Serializable, ITechManager {
             }
             Contract c = (Contract) m;
             if (c.isActive()
-                    && !getCalendar().getTime().after(c.getEndingDate())
-                    && !getCalendar().getTime().before(c.getStartDate())) {
+                    && !getDate().isAfter(c.getEndingDate())
+                    && !getDate().isBefore(c.getStartDate())) {
                 active.add(c);
             }
         }
@@ -3025,11 +3023,11 @@ public class Campaign implements Serializable, ITechManager {
     }
 
     public String getDateAsString() {
-        return dateFormat.format(calendar.getTime());
+        return getDate().format(dateFormat);
     }
 
     public String getShortDateAsString() {
-        return shortDateFormat.format(calendar.getTime());
+        return getDate().format(shortDateFormat);
     }
 
     public void restore() {
@@ -3138,12 +3136,15 @@ public class Campaign implements Serializable, ITechManager {
 
     private void addInMemoryLogHistory(LogEntry le) {
         if (inMemoryLogHistory.size() != 0) {
-            long diff = le.getDate().getTime() - inMemoryLogHistory.get(0).getDate().getTime();
-            while ((diff / (1000 * 60 * 60 * 24)) > HistoricalDailyReportDialog.MAX_DAYS_HISTORY) {
+            long diff = ChronoUnit.DAYS.between(inMemoryLogHistory.get(0).getDate(), le.getDate());
+            while (diff > HistoricalDailyReportDialog.MAX_DAYS_HISTORY) {
                 //we've hit the max size for the in-memory based on the UI display limit
                 //prune the oldest entry
                 inMemoryLogHistory.remove(0);
-                diff = le.getDate().getTime() - inMemoryLogHistory.get(0).getDate().getTime();
+                if (inMemoryLogHistory.size() == 0) {
+                    break;
+                }
+                diff = ChronoUnit.DAYS.between(inMemoryLogHistory.get(0).getDate(), le.getDate());
             }
         }
         inMemoryLogHistory.add(le);
@@ -3236,7 +3237,7 @@ public class Campaign implements Serializable, ITechManager {
         if (category == -1) {
             category = Transaction.C_MISC;
         }
-        finances.credit(quantity, category, description, calendar.getTime());
+        finances.credit(quantity, category, description, getDate());
         NumberFormat numberFormat = DecimalFormat.getIntegerInstance();
         String quantityString = numberFormat.format(quantity);
         addReport("Funds added : " + quantityString + " (" + description + ")");
@@ -3250,7 +3251,7 @@ public class Campaign implements Serializable, ITechManager {
         long cost = new Unit(en, this).getBuyCost();
         if (campaignOptions.payForUnits()) {
             if (finances.debit(cost, Transaction.C_UNIT,
-                    "Purchased " + en.getShortName(), calendar.getTime())) {
+                    "Purchased " + en.getShortName(), getDate())) {
                 addUnit(en, false, days);
                 return true;
             } else {
@@ -3266,7 +3267,7 @@ public class Campaign implements Serializable, ITechManager {
         Unit unit = getUnit(id);
         long sellValue = unit.getSellValue();
         finances.credit(sellValue, Transaction.C_UNIT_SALE,
-                "Sale of " + unit.getName(), calendar.getTime());
+                "Sale of " + unit.getName(), getDate());
         removeUnit(id);
         MekHQ.triggerEvent(new UnitRemovedEvent(unit));
     }
@@ -3286,7 +3287,7 @@ public class Campaign implements Serializable, ITechManager {
             plural = "s";
         }
         finances.credit(cost, Transaction.C_EQUIP_SALE, "Sale of " + quantity
-                + " " + part.getName() + plural, calendar.getTime());
+                + " " + part.getName() + plural, getDate());
         while (quantity > 0 && part.getQuantity() > 0) {
             part.decrementQuantity();
             quantity--;
@@ -3299,7 +3300,7 @@ public class Campaign implements Serializable, ITechManager {
         boolean sellingAllAmmo = shots == ammo.getShots();
         long cost = (long) (ammo.getActualValue() * ((double) shots / ammo.getShots()));
         finances.credit(cost, Transaction.C_EQUIP_SALE, "Sale of " + shots
-                + " " + ammo.getName(), calendar.getTime());
+                + " " + ammo.getName(), getDate());
         if (sellingAllAmmo) {
             ammo.decrementQuantity();
         } else {
@@ -3318,7 +3319,7 @@ public class Campaign implements Serializable, ITechManager {
         }
         long cost = (long) (armor.getActualValue() * proportion);
         finances.credit(cost, Transaction.C_EQUIP_SALE, "Sale of " + points
-                + " " + armor.getName(), calendar.getTime());
+                + " " + armor.getName(), getDate());
         if (sellingAllArmor) {
             armor.decrementQuantity();
         } else {
@@ -3344,7 +3345,7 @@ public class Campaign implements Serializable, ITechManager {
 
     public boolean buyRefurbishment(Part part) {
         if (getCampaignOptions().payForParts()) {
-            if (finances.debit(part.getStickerPrice(), Transaction.C_EQUIP, "Purchase of " + part.getName(), calendar.getTime())) {
+            if (finances.debit(part.getStickerPrice(), Transaction.C_EQUIP, "Purchase of " + part.getName(), getDate())) {
                 return true;
             } else {
                 return false;
@@ -3361,7 +3362,7 @@ public class Campaign implements Serializable, ITechManager {
     public boolean buyPart(Part part, double multiplier, int transitDays) {
         if (getCampaignOptions().payForParts()) {
             if (finances.debit((long) (multiplier * part.getStickerPrice()),
-                    Transaction.C_EQUIP, "Purchase of " + part.getName(), calendar.getTime())) {
+                    Transaction.C_EQUIP, "Purchase of " + part.getName(), getDate())) {
                 if (part instanceof Refit) {
                     ((Refit) part).addRefitKitParts(transitDays);
                 } else {
@@ -3458,7 +3459,7 @@ public class Campaign implements Serializable, ITechManager {
         MekHqXmlUtil.writeSimpleXmlTag(pw1, 2, "lastMissionId", lastMissionId);
         MekHqXmlUtil.writeSimpleXmlTag(pw1, 2, "lastScenarioId", lastScenarioId);
         MekHqXmlUtil.writeSimpleXmlTag(pw1, 2, "calendar",
-                MekHqXmlUtil.formatDate(calendar.getTime()));
+                MekHqXmlUtil.formatDate(getDate()));
         MekHqXmlUtil.writeSimpleXmlTag(pw1, 2, "fatigueLevel", fatigueLevel);
         {
             pw1.println("\t\t<nameGen>");
@@ -3548,13 +3549,13 @@ public class Campaign implements Serializable, ITechManager {
             retirementDefectionTracker.writeToXml(pw1, 1);
             if (shipSearchStart != null) {
                 MekHqXmlUtil.writeSimpleXmlTag(pw1, 2, "shipSearchStart",
-                        shortDateFormat.format(shipSearchStart.getTime()));
+                        MekHqXmlUtil.formatDate(shipSearchStart));
             }
             MekHqXmlUtil.writeSimpleXmlTag(pw1, 2, "shipSearchType", shipSearchType);
             MekHqXmlUtil.writeSimpleXmlTag(pw1, 2, "shipSearchResult", shipSearchResult);
             if (shipSearchExpiration != null) {
                 MekHqXmlUtil.writeSimpleXmlTag(pw1, 2, "shipSearchExpiration",
-                        shortDateFormat.format(shipSearchExpiration.getTime()));
+                    MekHqXmlUtil.formatDate(shipSearchExpiration));
             }
         }
 
@@ -3722,7 +3723,7 @@ public class Campaign implements Serializable, ITechManager {
      * @throws DOMException
      */
     public static Campaign createCampaignFromXMLFileInputStream(
-            FileInputStream fis, MekHQ app) throws DOMException, ParseException,
+            FileInputStream fis, MekHQ app) throws DOMException, DateTimeParseException,
             NullEntityException {
         final String METHOD_NAME = "createCampaignFromXMLFileInputStream(FileInputStream,MekHQ)"; //$NON-NLS-1$
 
@@ -3893,15 +3894,13 @@ public class Campaign implements Serializable, ITechManager {
                 } else if (xn.equalsIgnoreCase("retirementDefectionTracker")) {
                     retVal.retirementDefectionTracker = RetirementDefectionTracker.generateInstanceFromXML(wn, retVal);
                 } else if (xn.equalsIgnoreCase("shipSearchStart")) {
-                    retVal.shipSearchStart = new GregorianCalendar();
-                    retVal.shipSearchStart.setTime(retVal.shortDateFormat.parse(wn.getTextContent()));
+                    retVal.shipSearchStart = MekHqXmlUtil.parseDate(wn.getTextContent());
                 } else if (xn.equalsIgnoreCase("shipSearchType")) {
                     retVal.shipSearchType = Integer.parseInt(wn.getTextContent());
                 } else if (xn.equalsIgnoreCase("shipSearchResult")) {
                     retVal.shipSearchResult = wn.getTextContent();
                 } else if (xn.equalsIgnoreCase("shipSearchExpiration")) {
-                    retVal.shipSearchExpiration = new GregorianCalendar();
-                    retVal.shipSearchExpiration.setTime(retVal.shortDateFormat.parse(wn.getTextContent()));
+                    retVal.shipSearchExpiration = MekHqXmlUtil.parseDate(wn.getTextContent());
                 } else if (xn.equalsIgnoreCase("customPlanetaryEvents")) {
                     updatePlanetaryEventsFromXML(wn);
                 }
@@ -5136,7 +5135,7 @@ public class Campaign implements Serializable, ITechManager {
      * @throws DOMException
      */
     private static void processInfoNode(Campaign retVal, Node wni,
-            Version version) throws DOMException, ParseException {
+            Version version) throws DOMException, DateTimeParseException {
         NodeList nl = wni.getChildNodes();
 
         String rankNames = null;
@@ -5157,12 +5156,7 @@ public class Campaign implements Serializable, ITechManager {
                 // handle it.
                 // They're all primitives anyway...
                 if (xn.equalsIgnoreCase("calendar")) {
-                    SimpleDateFormat df = new SimpleDateFormat(
-                            "yyyy-MM-dd hh:mm:ss");
-                    retVal.calendar = (GregorianCalendar) GregorianCalendar
-                            .getInstance();
-                    retVal.calendar.setTime(df
-                            .parse(wn.getTextContent().trim()));
+                    retVal.calendar = MekHqXmlUtil.parseDate(wn.getTextContent());
                 } else if (xn.equalsIgnoreCase("camoCategory")) {
                     String val = wn.getTextContent().trim();
 
@@ -5345,13 +5339,13 @@ public class Campaign implements Serializable, ITechManager {
     public Vector<String> getPlanetNames() {
         Vector<String> plntNames = new Vector<String>();
         for (Planet key : Planets.getInstance().getPlanets().values()) {
-            plntNames.add(key.getPrintableName(Utilities.getDateTimeDay(calendar)));
+            plntNames.add(key.getPrintableName(getDate()));
         }
         return plntNames;
     }
 
     public Planet getPlanet(String name) {
-        return Planets.getInstance().getPlanetByName(name, Utilities.getDateTimeDay(calendar));
+        return Planets.getInstance().getPlanetByName(name, getDate());
     }
 
     public Person newPerson(int type) {
@@ -5434,15 +5428,14 @@ public class Campaign implements Serializable, ITechManager {
                     break;
             }
         }
-        GregorianCalendar birthdate = (GregorianCalendar) getCalendar().clone();
-        birthdate.set(Calendar.YEAR, birthdate.get(Calendar.YEAR) - Utilities.getAgeByExpLevel(expLvl, person.isClanner() && person.getPhenotype() != Person.PHENOTYPE_NONE));
+
+        int birthYear = getDate().getYear() - Utilities.getAgeByExpLevel(expLvl, person.isClanner() && person.getPhenotype() != Person.PHENOTYPE_NONE);
+        LocalDate birthdate = LocalDate.ofYearDay(birthYear, 1);
+        
         // choose a random day and month
-        int nDays = 365;
-        if (birthdate.isLeapYear(birthdate.get(Calendar.YEAR))) {
-            nDays = 366;
-        }
-        int randomDay = Compute.randomInt(nDays) + 1;
-        birthdate.set(Calendar.DAY_OF_YEAR, randomDay);
+        int randomDay = Compute.randomInt(birthdate.lengthOfYear()) + 1;
+        birthdate = LocalDate.ofYearDay(birthYear, randomDay);
+
         person.setBirthday(birthdate);
         // set default skills
         int mod = 0;
@@ -5756,7 +5749,7 @@ public class Campaign implements Serializable, ITechManager {
                                 : rating.getModifier());
             }
             // Reavings diminish the number of available Bloodrights in later eras
-            int year = getCalendar().get(Calendar.YEAR);
+            int year = getDate().getYear();
             if (year <= 2950)
                 bloodnameTarget--;
             if (year > 3055)
@@ -5870,7 +5863,7 @@ public class Campaign implements Serializable, ITechManager {
         } else if (name.equals("weapon_specialist")) {
             person.acquireAbility(PilotOptions.LVL3_ADVANTAGES, name,
                     SpecialAbility.chooseWeaponSpecialization(type, getFaction().isClan(),
-                            getCampaignOptions().getTechLevel(), getCalendar().get(GregorianCalendar.YEAR)));
+                            getCampaignOptions().getTechLevel(), getDate().getYear()));
         } else {
             person.acquireAbility(PilotOptions.LVL3_ADVANTAGES, name, true);
         }
@@ -5967,7 +5960,7 @@ public class Campaign implements Serializable, ITechManager {
         String startKey = start.getId();
         String endKey = end.getId();
 
-        final DateTime now = Utilities.getDateTimeDay(calendar);
+        final LocalDate now = getDate();
         String current = startKey;
         ArrayList<String> closed = new ArrayList<String>();
         ArrayList<String> open = new ArrayList<String>();
@@ -6655,8 +6648,8 @@ public class Campaign implements Serializable, ITechManager {
 
             }
 
-            if ((getCalendar().get(Calendar.YEAR) < 2950
-                    || getCalendar().get(Calendar.YEAR) > 3040)
+            if ((getDate().getYear() < 2950
+                    || getDate().getYear() > 3040)
                     && (acquisition instanceof Armor || acquisition instanceof MissingMekActuator
                             || acquisition instanceof mekhq.campaign.parts.MissingMekCockpit
                             || acquisition instanceof mekhq.campaign.parts.MissingMekLifeSupport
@@ -6893,7 +6886,7 @@ public class Campaign implements Serializable, ITechManager {
                 }
                 p.addLogEntry(getDate(), "Freed");
                 if (getCampaignOptions().getUseTimeInService()) {
-                    p.setRecruitment((GregorianCalendar) getCalendar().clone());
+                    p.setRecruitment(getDate());
                 }
                 break;
             case Person.PRISONER_YES:
@@ -6941,7 +6934,7 @@ public class Campaign implements Serializable, ITechManager {
                 spouse.setSpouseID(null);
             }
             // set the deathday
-            person.setDeathday((GregorianCalendar) calendar.clone());
+            person.setDeathday(getDate());
         } else if (person.getStatus() == Person.S_KIA) {
             // remove deathdates for resurrection
             person.setDeathday(null);
@@ -7712,7 +7705,7 @@ public class Campaign implements Serializable, ITechManager {
                 long remainingMoney = contract.getMonthlyPayOut()
                         * contract.getMonthsLeft(getDate());
                 finances.credit(remainingMoney, Transaction.C_CONTRACT,
-                        "Remaining payment for " + contract.getName(), calendar.getTime());
+                        "Remaining payment for " + contract.getName(), getDate());
                 addReport("Your account has been credited for "
                         + formatter.format(remainingMoney) + " C-bills for the remaining payout from contract "
                         + contract.getName());
@@ -7727,57 +7720,57 @@ public class Campaign implements Serializable, ITechManager {
             time += Compute.d6(nDice);
         }
         // now step forward through the calendar
-        GregorianCalendar arrivalDate = (GregorianCalendar) calendar.clone();
+        LocalDate arrivalDate = getDate();
         switch (getCampaignOptions().getUnitTransitTime()) {
             case CampaignOptions.TRANSIT_UNIT_MONTH:
-                arrivalDate.add(Calendar.MONTH, time);
+                arrivalDate = arrivalDate.plusMonths(time);
                 break;
             case CampaignOptions.TRANSIT_UNIT_WEEK:
-                arrivalDate.add(Calendar.WEEK_OF_YEAR, time);
+                arrivalDate = arrivalDate.plusWeeks(time);
                 break;
             case CampaignOptions.TRANSIT_UNIT_DAY:
             default:
-                arrivalDate.add(Calendar.DAY_OF_MONTH, time);
+                arrivalDate = arrivalDate.plusDays(time);
+                break;
         }
 
         // now adjust for MoS and minimums
         int mosBonus = getCampaignOptions().getAcquireMosBonus() * mos;
         switch (getCampaignOptions().getAcquireMosUnit()) {
             case CampaignOptions.TRANSIT_UNIT_MONTH:
-                arrivalDate.add(Calendar.MONTH, -1 * mosBonus);
+                arrivalDate = arrivalDate.minusMonths(mosBonus);
                 break;
             case CampaignOptions.TRANSIT_UNIT_WEEK:
-                arrivalDate.add(Calendar.WEEK_OF_YEAR, -1 * mosBonus);
+                arrivalDate = arrivalDate.minusWeeks(mosBonus);
                 break;
             case CampaignOptions.TRANSIT_UNIT_DAY:
             default:
-                arrivalDate.add(Calendar.DAY_OF_MONTH, -1 * mosBonus);
+                arrivalDate = arrivalDate.minusDays(mosBonus);
+                break;
         }
         // now establish minimum date and if this is before
-        GregorianCalendar minimumDate = (GregorianCalendar) calendar.clone();
+        LocalDate minimumDate = getDate();
         switch (getCampaignOptions().getAcquireMinimumTimeUnit()) {
             case CampaignOptions.TRANSIT_UNIT_MONTH:
-                minimumDate.add(Calendar.MONTH, getCampaignOptions()
+                minimumDate = minimumDate.plusMonths(getCampaignOptions()
                         .getAcquireMinimumTime());
                 break;
             case CampaignOptions.TRANSIT_UNIT_WEEK:
-                minimumDate.add(Calendar.WEEK_OF_YEAR, getCampaignOptions()
+                minimumDate = minimumDate.plusWeeks(getCampaignOptions()
                         .getAcquireMinimumTime());
                 break;
             case CampaignOptions.TRANSIT_UNIT_DAY:
             default:
-                minimumDate.add(Calendar.DAY_OF_MONTH, getCampaignOptions()
+                minimumDate = minimumDate.plusDays(getCampaignOptions()
                         .getAcquireMinimumTime());
+                break;
         }
 
-        if (arrivalDate.before(minimumDate)) {
-            return Utilities.getDaysBetween(calendar.getTime(),
-                    minimumDate.getTime());
+        if (arrivalDate.isBefore(minimumDate)) {
+            return (int)ChronoUnit.DAYS.between(getDate(), minimumDate);
         } else {
-            return Utilities.getDaysBetween(calendar.getTime(),
-                    arrivalDate.getTime());
+            return (int)ChronoUnit.DAYS.between(getDate(), arrivalDate);
         }
-
     }
 
     /**
@@ -7962,13 +7955,13 @@ public class Campaign implements Serializable, ITechManager {
         finances.addLoan(loan);
         MekHQ.triggerEvent(new LoanNewEvent(loan));
         finances.credit(loan.getPrincipal(), Transaction.C_LOAN_PRINCIPAL,
-                "loan principal for " + loan.getDescription(), calendar.getTime());
+                "loan principal for " + loan.getDescription(), getDate());
 
     }
 
     public void payOffLoan(Loan loan) {
         if (finances.debit(loan.getRemainingValue(),
-                Transaction.C_LOAN_PAYMENT, "loan payoff for " + loan.getDescription(), calendar.getTime())) {
+                Transaction.C_LOAN_PAYMENT, "loan payoff for " + loan.getDescription(), getDate())) {
             addReport("You have paid off the remaining loan balance of "
                     + DecimalFormat.getInstance().format(loan.getRemainingValue()) + "on " + loan.getDescription());
             finances.removeLoan(loan);
@@ -8847,7 +8840,7 @@ public class Campaign implements Serializable, ITechManager {
             // maybe use the money
             if (campaignOptions.payForMaintain()) {
                 if (finances.debit(u.getMaintenanceCost(), Transaction.C_MAINTAIN, "Maintenance for " + u.getName(),
-                        calendar.getTime())) {
+                        getDate())) {
                 } else {
                     addReport("<font color='red'><b>You cannot afford to pay maintenance costs for "
                             + u.getHyperlinkedName() + "!</b></font>");
@@ -9037,7 +9030,7 @@ public class Campaign implements Serializable, ITechManager {
 
     public void initTimeInService() {
         for (Person p : getPersonnel()) {
-            Date join = null;
+            LocalDate join = null;
             for (LogEntry e : p.getPersonnelLog()) {
                 if (join == null){
                     // If by some nightmare there is no Joined date just use the first entry.
@@ -9049,22 +9042,18 @@ public class Campaign implements Serializable, ITechManager {
                 }
             }
             if (!p.isDependent() && !p.isPrisoner() && !p.isBondsman()) {
-                GregorianCalendar cal = (GregorianCalendar) GregorianCalendar.getInstance();
                 // For that one in a billion chance the log is empty. Clone todays date and subtract a year
                 if (join == null) {
-                    cal = (GregorianCalendar)calendar.clone();
-                    cal.add(Calendar.YEAR, -1);
-                    p.setRecruitment(cal);
+                    p.setRecruitment(getDate().minusYears(1));
                 } else {
-                    cal.setTime(join);
-                    p.setRecruitment(cal);
+                    p.setRecruitment(join);
                 }
             }
         }
     }
 
     public void initAtB() {
-        retirementDefectionTracker.setLastRetirementRoll(calendar);
+        retirementDefectionTracker.setLastRetirementRoll(getDate());
 
         /*
          * Switch all contracts to AtBContract's
@@ -9080,10 +9069,10 @@ public class Campaign implements Serializable, ITechManager {
          * Go through all the personnel records and assume the earliest date is the date
          * the unit was founded.
          */
-        Date founding = null;
+        LocalDate founding = null;
         for (Person p : getPersonnel()) {
             for (LogEntry e : p.getPersonnelLog()) {
-                if (null == founding || e.getDate().before(founding)) {
+                if (null == founding || e.getDate().isBefore(founding)) {
                     founding = e.getDate();
                 }
             }
@@ -9095,7 +9084,7 @@ public class Campaign implements Serializable, ITechManager {
          * that 'Mech (which is a less certain assumption)
          */
         for (Person p : getPersonnel()) {
-            Date join = null;
+            LocalDate join = null;
             for (LogEntry e : p.getPersonnelLog()) {
                 if (e.getDesc().startsWith("Joined ")) {
                     join = e.getDate();
@@ -9182,8 +9171,8 @@ public class Campaign implements Serializable, ITechManager {
 
     public boolean checkYearlyRetirements() {
         if (getCampaignOptions().getUseAtB()
-                && Utilities.getDaysBetween(getRetirementDefectionTracker()
-                        .getLastRetirementRoll().getTime(), getDate()) == 365) {
+                && ChronoUnit.DAYS.between(getRetirementDefectionTracker()
+                        .getLastRetirementRoll(), getDate()) == 365) {
             Object[] options = { "Show Retirement Dialog", "Not Now" };
             if (JOptionPane.YES_OPTION == JOptionPane
                     .showOptionDialog(
@@ -9279,7 +9268,7 @@ public class Campaign implements Serializable, ITechManager {
 
     @Override
     public int getGameYear() {
-        return calendar.get(Calendar.YEAR);
+        return getDate().getYear();
     }
 
     @Override

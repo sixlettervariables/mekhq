@@ -182,7 +182,7 @@ public class Faction {
     }
 
     public int getTechMod(Part part, Campaign campaign) {
-        int currentYear = campaign.getCalendar().get(Calendar.YEAR);
+        int currentYear = campaign.getGameYear();
 
         //TODO: This seems hacky - we shouldn't hardcode in universe details
         //like this

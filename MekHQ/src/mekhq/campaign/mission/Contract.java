@@ -22,15 +22,12 @@ package mekhq.campaign.mission;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.format.DateTimeParseException;
 
 import org.apache.commons.text.CharacterPredicate;
 import org.apache.commons.text.RandomStringGenerator;
-import org.joda.time.DateTime;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -38,7 +35,6 @@ import megamek.common.BattleArmor;
 import megamek.common.Infantry;
 import mekhq.MekHqXmlSerializable;
 import mekhq.MekHqXmlUtil;
-import mekhq.Utilities;
 import mekhq.campaign.Campaign;
 import mekhq.campaign.JumpPath;
 import mekhq.campaign.unit.Unit;
@@ -55,7 +51,7 @@ public class Contract extends Mission implements Serializable, MekHqXmlSerializa
     /**
      *
      */
-    private static final long serialVersionUID   = 4606932545119410453L;
+    private static final long serialVersionUID   = 2L;
 
     public final static int   OH_NONE            = 0;
     public final static int   OH_HALF            = 1;
@@ -68,8 +64,8 @@ public class Contract extends Mission implements Serializable, MekHqXmlSerializa
     public final static int   COM_INDEP          = 3;
     public final static int   COM_NUM            = 4;
 
-    private Date startDate;
-    private Date endDate;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private int nMonths;
 
     private String employer;
@@ -168,16 +164,20 @@ public class Contract extends Mission implements Serializable, MekHqXmlSerializa
         nMonths = m;
     }
 
-    public Date getStartDate() {
+    public LocalDate getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(Date d) {
+    public void setStartDate(LocalDate d) {
         startDate = d;
     }
 
-    public Date getEndingDate() {
+    public LocalDate getEndingDate() {
         return endDate;
+    }
+
+    public void setEndingDate(LocalDate d) {
+        endDate = d;
     }
 
     public double getMultiplier() {
@@ -394,7 +394,7 @@ public class Contract extends Mission implements Serializable, MekHqXmlSerializa
 
     private int getTravelDays(Campaign c) {
         if (null != this.getPlanet()) {
-            DateTime currentDate = Utilities.getDateTimeDay(c.getCalendar());
+            LocalDate currentDate = c.getDate();
             JumpPath jumpPath = c.calculateJumpPath(c.getCurrentPlanet(), getPlanet());
             double days = Math.round(jumpPath.getTotalTime(currentDate, c.getLocation().getTransitTime()) * 100.0) / 100.0;
             return (int) Math.round(days);
@@ -442,18 +442,10 @@ public class Contract extends Mission implements Serializable, MekHqXmlSerializa
      * @param date
      * @return
      */
-	public int getMonthsLeft(Date date) {
-		GregorianCalendar cal = new GregorianCalendar();
-		cal.setTime(date);
-		cal.add(Calendar.MONTH, 1);
-		date = cal.getTime();
-		int monthsLeft = 0;
-		while(date.before(endDate) || date.equals(endDate)) {
-			monthsLeft++;
-			cal.add(Calendar.MONTH, 1);
-			date = cal.getTime();
-		}
-		return monthsLeft;
+	public int getMonthsLeft(LocalDate date) {
+        Period period = Period.between(date, endDate);
+        // Calculate the total number of months (including partial) left
+		return period.getYears() * 12 + period.getMonths() + (period.getDays() > 0 ? 1 : 0);
 	}
 
 	/**
@@ -528,26 +520,17 @@ public class Contract extends Mission implements Serializable, MekHqXmlSerializa
         // only adjust the start date for travel if the start date is currently null
         boolean adjustStartDate = false;
         if (null == startDate) {
-            startDate = c.getCalendar().getTime();
+            startDate = c.getDate();
             adjustStartDate = true;
         }
-        GregorianCalendar cal = new GregorianCalendar();
-        cal.setTime(startDate);
         if (adjustStartDate && null != c.getPlanet(planetId)) {
             int days = (int) Math.ceil(c.calculateJumpPath(c.getCurrentPlanet(), getPlanet())
-                    .getTotalTime(Utilities.getDateTimeDay(cal), c.getLocation().getTransitTime()));
-            while (days > 0) {
-                cal.add(Calendar.DAY_OF_YEAR, 1);
-                days--;
-            }
-            startDate = cal.getTime();
+                    .getTotalTime(c.getDate(), c.getLocation().getTransitTime()));
+            startDate = startDate.plusDays(days);
         }
+
         int months = getLength();
-        while (months > 0) {
-            cal.add(Calendar.MONTH, 1);
-            months--;
-        }
-        endDate = cal.getTime();
+        endDate = startDate.plusMonths(months);
     }
 
     @Override
@@ -583,7 +566,7 @@ public class Contract extends Mission implements Serializable, MekHqXmlSerializa
     }
 
     @Override
-    public void loadFieldsFromXmlNode(Node wn) throws ParseException {
+    public void loadFieldsFromXmlNode(Node wn) throws DateTimeParseException {
         // Okay, now load mission-specific fields!
         NodeList nl = wn.getChildNodes();
         for (int x = 0; x < nl.getLength(); x++) {

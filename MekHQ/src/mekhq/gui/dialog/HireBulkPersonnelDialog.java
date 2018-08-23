@@ -14,6 +14,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.GregorianCalendar;
 import java.util.Objects;
 import java.util.ResourceBundle;
@@ -286,28 +288,29 @@ public class HireBulkPersonnelDialog extends JDialog {
 
     private void hire() {
         int number = (Integer)spnNumber.getModel().getValue();
-        GregorianCalendar today = campaign.getCalendar();
-        DateTime earliestBirthDate = null;
-        DateTime latestBirthDate = null;
+        LocalDate today = campaign.getDate();
+        LocalDate earliestBirthDate = null;
+        LocalDate latestBirthDate = null;
         if(useAge) {
             // One day before birthday
-            earliestBirthDate = Utilities.getDateTimeDay(today).minus(Years.years(maxAgeVal + 1)).plus(Days.ONE);
+            earliestBirthDate = today.minusYears(maxAgeVal + 1)
+                                     .plusDays(1);
             // Just the birthday
-            latestBirthDate = Utilities.getDateTimeDay(today).minus(Years.years(minAgeVal));
+            latestBirthDate = today.minusYears(minAgeVal);
         } 
         while(number > 0) {
             Person p = campaign.newPerson(((PersonTypeItem)choiceType.getSelectedItem()).id);
             if (campaign.getCampaignOptions().getUseTimeInService()) {
-                GregorianCalendar rawrecruit = (GregorianCalendar) campaign.getCalendar().clone();
+                LocalDate rawrecruit = campaign.getDate();
                 p.setRecruitment(rawrecruit);
             }
             p.setRankNumeric(campaign.getRanks().getRankNumericFromNameAndProfession(p.getProfession(), (String)choiceRanks.getSelectedItem()));
             int age = p.getAge(today);
             if(useAge) {
                 if((age > maxAgeVal) || (age < minAgeVal)) {
-                    int days = Days.daysBetween(earliestBirthDate, latestBirthDate).getDays();
-                    DateTime birthDay = earliestBirthDate.plus(Days.days(Compute.randomInt(days)));
-                    p.setBirthday(birthDay.toGregorianCalendar());
+                    int days = (int)ChronoUnit.DAYS.between(earliestBirthDate, latestBirthDate);
+                    LocalDate birthDay = earliestBirthDate.plusDays(Compute.randomInt(days));
+                    p.setBirthday(birthDay);
                     age = p.getAge(today);
                 }
             }

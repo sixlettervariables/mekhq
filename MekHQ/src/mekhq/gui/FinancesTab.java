@@ -26,8 +26,9 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -236,18 +237,18 @@ public final class FinancesTab extends CampaignGuiTab {
     private XYDataset setupFinanceDataset() {
     	TimeSeries s1 = new TimeSeries("C-Bills"); // NOI18N
     	ArrayList<Transaction> transactions = getCampaign().getFinances().getAllTransactions();
-    	Calendar cal = Calendar.getInstance();
+    	LocalDate cal = null;
     	
     	long balance = 0;
     	for (int i = 0; i < transactions.size(); i++) {
     		balance += transactions.get(i).getAmount();
-    		cal.setTime(transactions.get(i).getDate());
+    		cal = transactions.get(i).getDate();
     		// since there may be more than one entry per day and the dataset for the graph can only have one entry per day
     		// we use addOrUpdate() which assumes transactions are in sequential order by date so we always have the most
-    		// up-to-date entry for each day
-    		s1.addOrUpdate(new Day(cal.get(Calendar.DAY_OF_MONTH),
-    				cal.get(Calendar.MONTH)+1, // Gregorian and Julian calendars start at 0: https://docs.oracle.com/javase/7/docs/api/java/util/Calendar.html#MONTH
-    				cal.get(Calendar.YEAR)), 
+            // up-to-date entry for each day
+    		s1.addOrUpdate(new Day(cal.getDayOfMonth(),
+    				cal.getMonth().ordinal()+1, // Gregorian and Julian calendars start at 0: https://docs.oracle.com/javase/7/docs/api/java/util/Calendar.html#MONTH
+    				cal.getYear()), 
     				balance);
     	}
                 
@@ -258,18 +259,18 @@ public final class FinancesTab extends CampaignGuiTab {
     }
     
     private CategoryDataset setupMonthlyDataset() {
-    	SimpleDateFormat df = new SimpleDateFormat("MMM-yyyy");
+    	DateTimeFormatter df = DateTimeFormatter.ofPattern("MMM-yyyy");
     	DefaultCategoryDataset dataset = new DefaultCategoryDataset();
     	ArrayList<Transaction> transactions = getCampaign().getFinances().getAllTransactions();
-    	Calendar cal = Calendar.getInstance();
+    	LocalDate cal = null;
     	
     	String pastMonthYear = "";
     	long monthlyRevenue = 0;
     	long monthlyExpenditures = 0;
     	for (int i = 0; i < transactions.size(); i++) {
-    		cal.setTime(transactions.get(i).getDate());
+    		cal = transactions.get(i).getDate();
     		
-    		if (pastMonthYear.equals(df.format(cal.getTime()))) {
+    		if (pastMonthYear.equals(df.format(cal))) {
     			if (transactions.get(i).getAmount() > 0) {
     				monthlyRevenue += transactions.get(i).getAmount();
     			} else {
@@ -283,7 +284,7 @@ public final class FinancesTab extends CampaignGuiTab {
     				monthlyRevenue = 0;
     				monthlyExpenditures = 0;
     			}
-    			pastMonthYear = df.format(cal.getTime());
+    			pastMonthYear = df.format(cal);
     			if (transactions.get(i).getAmount() > 0) {
     				monthlyRevenue = transactions.get(i).getAmount();
     			} else {
