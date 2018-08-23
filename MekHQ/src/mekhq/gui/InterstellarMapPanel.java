@@ -46,6 +46,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -70,8 +71,6 @@ import javax.swing.JViewport;
 import javax.swing.Timer;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.vecmath.Vector2d;
-
-import org.joda.time.DateTime;
 
 import megamek.common.EquipmentType;
 import mekhq.Utilities;
@@ -127,7 +126,7 @@ public class InterstellarMapPanel extends JPanel {
     private transient double minY;
     private transient double maxX;
     private transient double maxY;
-    private transient DateTime now;
+    private transient LocalDate now;
 
     public InterstellarMapPanel(Campaign c, CampaignGUI view) {
         campaign = c;
@@ -337,7 +336,7 @@ public class InterstellarMapPanel extends JPanel {
                     item = new JMenuItem("Edit planetary events");
                     item.setEnabled(selectedPlanet != null && campaign.isGM());
                     if (selectedPlanet != null) {
-                        item.setText("Edit planetary events for " + selectedPlanet.getPrintableName(Utilities.getDateTimeDay(campaign.getCalendar())));
+                        item.setText("Edit planetary events for " + selectedPlanet.getPrintableName(campaign.getDate()));
                         item.addActionListener(new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent ae) {
@@ -455,7 +454,7 @@ public class InterstellarMapPanel extends JPanel {
                 minY = scr2mapY(getHeight() + size * 2.0);
                 maxX = scr2mapX(getWidth() + size * 2.0);
                 maxY = scr2mapY(- size * 2.0);
-                now = Utilities.getDateTimeDay(campaign.getCalendar());
+                now = campaign.getDate();
                 
                 Arc2D.Double arc = new Arc2D.Double();
                 //first get the jump diameter for selected planet
@@ -726,7 +725,7 @@ public class InterstellarMapPanel extends JPanel {
                         if (conf.showPlanetNamesThreshold == 0 || conf.scale > conf.showPlanetNamesThreshold
                                 || jumpPath.contains(planet)
                                 || (null != campaign.getLocation().getJumpPath() && campaign.getLocation().getJumpPath().contains(planet))) {
-                            final String planetName = planet.getPrintableName(Utilities.getDateTimeDay(campaign.getCalendar()));
+                            final String planetName = planet.getPrintableName(campaign.getDate());
                             final float xPos = (float) (x + size * 1.8);
                             final float yPos = (float) y;
                             g2.setPaint(Color.BLACK);

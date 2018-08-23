@@ -26,9 +26,8 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -41,10 +40,10 @@ import mekhq.campaign.LogEntry;
  * @author  Taharqa
  */
 public class EditLogEntryDialog extends javax.swing.JDialog {
-	private static final long serialVersionUID = -8038099101234445018L;
+	private static final long serialVersionUID = 2L;
     private Frame frame;
     private LogEntry entry;
-    private Date date;
+    private LocalDate date;
     
     private javax.swing.JButton btnClose;
     private javax.swing.JButton btnOK;
@@ -158,17 +157,15 @@ public class EditLogEntryDialog extends javax.swing.JDialog {
     }
     
     private void changeDate() {
-    	GregorianCalendar cal = new GregorianCalendar();
-    	cal.setTime(date);
-        DateChooser dc = new DateChooser(frame, cal);
+        DateChooser dc = new DateChooser(frame, date);
         if (dc.showDateChooser() == DateChooser.OK_OPTION) {
-            date = dc.getDate().getTime();
+            date = dc.getDate();
             btnDate.setText(getDateAsString());
         }
     }
     
     private String getDateAsString() {
-    	SimpleDateFormat dateFormat = new SimpleDateFormat("MMMM d yyyy");
+    	DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MMMM d yyyy");
         return dateFormat.format(date);
     }
 }

@@ -284,7 +284,7 @@ import mekhq.gui.BasicInfo;
                 return p.getGenderName();
             }
             if(col == COL_AGE) {
-                return Integer.toString(p.getAge(getCampaign().getCalendar()));
+                return Integer.toString(p.getAge(getCampaign().getDate()));
             }
             if(col == COL_TYPE) {
                 return p.getRoleDesc();

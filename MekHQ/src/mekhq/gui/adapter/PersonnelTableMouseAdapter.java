@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.time.LocalDate;
 import java.util.*;
 
 import javax.swing.JCheckBoxMenuItem;
@@ -1695,7 +1696,7 @@ public class PersonnelTableMouseAdapter extends MouseInputAdapter implements
             cbMenuItem.addActionListener(this);
             menu.add(cbMenuItem);
             if (oneSelected) {
-                if ((person.getAge(gui.getCampaign().getCalendar()) > 13) && (person.isFemale()) && !person.isPregnant()) {
+                if ((person.getAge(gui.getCampaign().getDate()) > 13) && (person.isFemale()) && !person.isPregnant()) {
                     menuItem = new JMenuItem(resourceMap.getString("addPregnancy.text")); //$NON-NLS-1$
                     menuItem.setActionCommand(CMD_ADD_PREGNANCY);
                     menuItem.addActionListener(this);
@@ -1711,7 +1712,7 @@ public class PersonnelTableMouseAdapter extends MouseInputAdapter implements
                 }
             }
             if (oneSelected && person.isActive()) {
-                GregorianCalendar calendar = gui.getCampaign().getCalendar();
+                LocalDate calendar = gui.getCampaign().getDate();
 
                 if ((person.getAge(calendar) > 13) && (person.getSpouseID() == null)) {
                     menu = new JMenu(resourceMap.getString("changeSpouse.text")); //$NON-NLS-1$

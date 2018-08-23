@@ -24,9 +24,8 @@ package mekhq.campaign.mission;
 import java.io.PrintWriter;
 import java.io.Serializable;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -52,7 +51,7 @@ import mekhq.campaign.unit.Unit;
  * @author Jay Lawson <jaylawson39 at yahoo.com>
  */
 public class Scenario implements Serializable {
-    private static final long serialVersionUID = -2193761569359938090L;
+    private static final long serialVersionUID = 2L;
     
     public static final int S_CURRENT  = 0;
     public static final int S_VICTORY  = 1;
@@ -66,7 +65,7 @@ public class Scenario implements Serializable {
     private String desc;
     private String report;
     private int status;
-    private Date date;
+    private LocalDate date;
     private ArrayList<Integer> subForceIds;
     private ArrayList<UUID> unitIds;
     private int id = -1;
@@ -145,11 +144,11 @@ public class Scenario implements Serializable {
         return getStatusName(getStatus());
     }
     
-    public void setDate(Date d) {
+    public void setDate(LocalDate d) {
         this.date = d;
     }
     
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
     

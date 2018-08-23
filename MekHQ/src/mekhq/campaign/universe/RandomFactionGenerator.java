@@ -21,18 +21,15 @@
 
 package mekhq.campaign.universe;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-
-import org.joda.time.DateTime;
 
 import megamek.common.Compute;
 import megamek.common.annotations.Nullable;
@@ -65,7 +62,7 @@ public class RandomFactionGenerator {
     private static final int BORDER_RANGE_NEAR_PERIPHERY = 90;
     private static final int BORDER_RANGE_DEEP_PERIPHERY = 210; //a bit more than this distance between HL and NC
 
-    private static final Date FORTRESS_REPUBLIC = new Date (new GregorianCalendar(3135,10,1).getTimeInMillis());
+    private static final LocalDate FORTRESS_REPUBLIC = LocalDate.of(3135, 10, 1);
 
     private static RandomFactionGenerator rfg = null;
 
@@ -102,7 +99,7 @@ public class RandomFactionGenerator {
     }
 
     public void startup(Campaign c) {
-        borderTracker.setDate(Utilities.getDateTimeDay(c.getCalendar()));
+        borderTracker.setDate(c.getDate());
         final Planet location = c.getLocation().getCurrentPlanet();
         borderTracker.setRegionCenter(location.getX(), location.getY());
         borderTracker.setRegionRadius(c.getCampaignOptions().getSearchRadius());
@@ -115,12 +112,8 @@ public class RandomFactionGenerator {
         }
     }
 
-    public void setDate(GregorianCalendar calendar) {
-        borderTracker.setDate(Utilities.getDateTimeDay(calendar));
-    }
-
-    public void setDate(DateTime when) {
-        borderTracker.setDate(when);
+    public void setDate(LocalDate d) {
+        borderTracker.setDate(d);
     }
 
     public void setSearchCenter(double x, double y) {
@@ -149,8 +142,8 @@ public class RandomFactionGenerator {
         MekHQ.unregisterHandler(this);
     }
 
-    private Date currentDate() {
-        return borderTracker.getLastUpdated().toDate();
+    private LocalDate currentDate() {
+        return borderTracker.getLastUpdated();
     }
 
     /**
@@ -164,7 +157,7 @@ public class RandomFactionGenerator {
                     || f.getShortName().equals("CLAN")) {
                 continue;
             }
-            if (f.getShortName().equals("ROS") && currentDate().after(FORTRESS_REPUBLIC)) {
+            if (f.getShortName().equals("ROS") && currentDate().isAfter(FORTRESS_REPUBLIC)) {
                 continue;
             }
 
@@ -191,7 +184,7 @@ public class RandomFactionGenerator {
             if (f.isClan() || FactionHints.isEmptyFaction(f)) {
                 continue;
             }
-            if (f.getShortName().equals("ROS") && currentDate().after(FORTRESS_REPUBLIC)) {
+            if (f.getShortName().equals("ROS") && currentDate().isAfter(FORTRESS_REPUBLIC)) {
                 continue;
             }
 
@@ -334,7 +327,7 @@ public class RandomFactionGenerator {
             if (!f.isClan() && !FactionHints.isEmptyFaction(f)) {
                 set.add(f.getShortName());
             }
-            if (f.getShortName().equals("ROS") && currentDate().after(FORTRESS_REPUBLIC)) {
+            if (f.getShortName().equals("ROS") && currentDate().isAfter(FORTRESS_REPUBLIC)) {
                 continue;
             }
             /* Add factions which do not control any planets to the employer list */
@@ -418,8 +411,8 @@ public class RandomFactionGenerator {
      * @return       An adjusted weight
      */
     protected double adjustBorderWeight(double count, Faction f,
-            Faction enemy, Date date) {
-        final Date TUKKAYID = new Date (new GregorianCalendar(3052,5,20).getTimeInMillis());
+            Faction enemy, LocalDate date) {
+        final LocalDate TUKKAYID = LocalDate.of(3052, 5, 20);
 
         if (factionHints.isNeutral(f, enemy, currentDate())
                 || factionHints.isNeutral(enemy, f, currentDate())) {
@@ -430,7 +423,7 @@ public class RandomFactionGenerator {
         }
         if (f.isClan() && enemy.isClan() &&
                 (factionHints.isAlliedWith(f, enemy, date) ||
-                        (date.before(TUKKAYID) && (borderTracker.getCenterY() < 600)))) {
+                        (date.isBefore(TUKKAYID) && (borderTracker.getCenterY() < 600)))) {
             /* Treat invading Clans as allies in the Inner Sphere */
             count /= 4.0;
         }

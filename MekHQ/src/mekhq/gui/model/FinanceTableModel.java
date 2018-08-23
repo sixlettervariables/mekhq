@@ -3,7 +3,7 @@ package mekhq.gui.model;
 import java.awt.Color;
 import java.awt.Component;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import javax.swing.JTable;
@@ -25,6 +25,8 @@ public class FinanceTableModel extends DataTableModel {
     public final static int COL_CREDIT   =   4;
     public final static int COL_BALANCE  =   5;
     public final static int N_COL          = 6;
+
+    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
     public FinanceTableModel() {
         data = new ArrayList<Transaction>();
@@ -91,8 +93,7 @@ public class FinanceTableModel extends DataTableModel {
             return formatter.format(balance);
         }
         if(col == COL_DATE) {
-            SimpleDateFormat shortDateFormat = new SimpleDateFormat("MM/dd/yyyy");
-            return shortDateFormat.format(transaction.getDate());
+            return dateFormatter.format(transaction.getDate());
         }
         return "?";
     }

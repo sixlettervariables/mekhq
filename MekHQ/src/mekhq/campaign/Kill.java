@@ -23,8 +23,7 @@ package mekhq.campaign;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Map;
 import java.util.UUID;
 
@@ -46,9 +45,9 @@ public class Kill implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 4680018605784351078L;
+	private static final long serialVersionUID = 2L;
 	private UUID pilotId;
-	private Date date;
+	private LocalDate date;
 	private String killed;
 	private String killer;
 	
@@ -59,7 +58,7 @@ public class Kill implements Serializable {
 	
 	}
 	
-	public Kill(UUID id, String kill, String killer, Date d) {
+	public Kill(UUID id, String kill, String killer, LocalDate d) {
 		pilotId = id;
 		this.killed = kill;
 		this.killer = killer;
@@ -74,7 +73,7 @@ public class Kill implements Serializable {
 		pilotId = id;
 	}
 	
-	public Date getDate() {
+	public LocalDate getDate() {
 		return date;
 	}
 	
@@ -86,7 +85,7 @@ public class Kill implements Serializable {
 		return killer;
 	}
 	
-	public void setDate(Date d) {
+	public void setDate(LocalDate d) {
 		date = d;
 	}
 	

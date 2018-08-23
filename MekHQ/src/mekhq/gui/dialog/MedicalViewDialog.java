@@ -37,10 +37,10 @@ import java.awt.event.MouseEvent;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,10 +65,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
 
-import org.joda.time.chrono.GJChronology;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-
 import megamek.common.util.EncodeControl;
 import mekhq.IconPackage;
 import mekhq.MekHQ;
@@ -87,9 +83,7 @@ import mekhq.gui.view.Paperdoll;
 public class MedicalViewDialog extends JDialog {
     private static final long serialVersionUID = 6178230374580087883L;
     private static final String MENU_CMD_SEPARATOR = ","; //$NON-NLS-1$
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd"); //$NON-NLS-1$
-    private final static DateTimeFormatter DATE_FORMATTER =
-        DateTimeFormat.forPattern("yyyy-MM-dd").withChronology(GJChronology.getInstanceUTC()); //$NON-NLS-1$
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd"); //$NON-NLS-1$
 
     private static final ExtraData.Key<String> DOCTOR_NOTES = new ExtraData.StringKey("doctor_notes"); //$NON-NLS-1$
     // TODO: Custom paper dolls
@@ -350,12 +344,10 @@ public class MedicalViewDialog extends JDialog {
             givenNames = String.join(" ", Arrays.copyOf(nameParts, nameParts.length - 1)); //$NON-NLS-1$
         }
         
-        GregorianCalendar birthday = (GregorianCalendar) p.getBirthday().clone();
-        DATE_FORMAT.setCalendar(birthday);
-        String birthdayString = DATE_FORMAT.format(birthday.getTime());
-        GregorianCalendar now = (GregorianCalendar) c.getCalendar().clone();
-        int ageInMonths = (now.get(Calendar.YEAR) - birthday.get(Calendar.YEAR)) * 12
-            + now.get(Calendar.MONTH) - birthday.get(Calendar.MONTH);
+        LocalDate birthday = p.getBirthday();
+        String birthdayString = DATE_FORMAT.format(birthday);
+        LocalDate now = c.getDate();
+        int ageInMonths = (int)ChronoUnit.MONTHS.between(birthday, now);
         
         String phenotype = (p.getPhenotype() != Person.PHENOTYPE_NONE) ? p.getPhenotypeName() : resourceMap.getString("baselinePhenotype.text"); //$NON-NLS-1$
         
@@ -482,13 +474,13 @@ public class MedicalViewDialog extends JDialog {
                     JLabel injLabel = null;
                     if(inj.getType().isPermanent()) {
                         injLabel = genWrittenText(String.format(resourceMap.getString("injuriesText.format"), //$NON-NLS-1$
-                            inj.getType().getSimpleName(), inj.getStart().toString(DATE_FORMATTER)));
+                            inj.getType().getSimpleName(), inj.getStart().format(DATE_FORMAT)));
                     } else if(inj.isPermanent() || (inj.getTime() <= 0)) {
                         injLabel = genWrittenText(String.format(resourceMap.getString("injuriesPermanent.format"), //$NON-NLS-1$
-                            inj.getType().getSimpleName(), inj.getStart().toString(DATE_FORMATTER)));
+                            inj.getType().getSimpleName(), inj.getStart().format(DATE_FORMAT)));
                     } else {
                         injLabel = genWrittenText(String.format(resourceMap.getString("injuriesTextAndDuration.format"), //$NON-NLS-1$
-                            inj.getType().getSimpleName(), inj.getStart().toString(DATE_FORMATTER), genTimePeriod(inj.getTime())));
+                            inj.getType().getSimpleName(), inj.getStart().format(DATE_FORMAT), genTimePeriod(inj.getTime())));
                     }
                     if(isGMMode()) {
                         injLabel.addMouseListener(new InjuryLabelMouseAdapter(injLabel, p, inj));

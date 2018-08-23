@@ -32,7 +32,7 @@ import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 
 /**
@@ -89,7 +89,7 @@ public class AwardsFactory {
      * @param date the date it was awarded
      * @return list with the awards belonging to that set
      */
-    public Award generateNew(String setName, String awardName, Date date){
+    public Award generateNew(String setName, String awardName, LocalDate date){
         Map<String, Award> awardSet = awardsMap.get(setName);
         Award blueprintAward = awardSet.get(awardName);
         return blueprintAward.createCopy(date);
@@ -105,7 +105,7 @@ public class AwardsFactory {
 
         String name = null;
         String set = null;
-        Date date = null;
+        LocalDate date = null;
 
         try {
             NodeList nl = node.getChildNodes();

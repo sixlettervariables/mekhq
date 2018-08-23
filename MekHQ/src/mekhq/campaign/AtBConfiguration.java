@@ -23,10 +23,9 @@ package mekhq.campaign;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -163,17 +162,16 @@ public class AtBConfiguration implements Serializable {
 				botLanceTables.put(key.replace("botLance.", ""), list);
 				break;
 			case "hiringHalls":
-				SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 				for (String entry : property.split("\\|")) {
 					String[] fields = entry.split(",");
 					try {
-						hiringHalls.add(new DatedRecord<>(fields[0].length() > 0? df.parse(fields[0]) : null,
-								fields[1].length() > 0? df.parse(fields[1]) : null,
+						hiringHalls.add(new DatedRecord<>(fields[0].length() > 0? LocalDate.parse(fields[0]) : null,
+								fields[1].length() > 0? LocalDate.parse(fields[1]) : null,
 										fields[2]));
-					} catch (ParseException ex) {
-                        MekHQ.getLogger().log(getClass(), METHOD_NAME,
-                                LogLevel.ERROR, "Error parsing default date for hiring hall on " + fields[2]); //$NON-NLS-1$
-                        MekHQ.getLogger().log(getClass(), METHOD_NAME, ex); //$NON-NLS-1$
+					} catch (DateTimeParseException ex) {
+                        MekHQ.getLogger().error(getClass(), METHOD_NAME,
+                                "Error parsing default date for hiring hall on " + fields[2]); //$NON-NLS-1$
+                        MekHQ.getLogger().error(getClass(), METHOD_NAME, ex); //$NON-NLS-1$
 					}
 				}
 				break;
@@ -270,7 +268,7 @@ public class AtBConfiguration implements Serializable {
 		return null;
 	}
 	
-	public boolean isHiringHall(String planet, Date date) {
+	public boolean isHiringHall(String planet, LocalDate date) {
 		return hiringHalls.stream().anyMatch( rec -> rec.getValue().equals(planet)
 				&& rec.fitsDate(date));
 	}
@@ -451,7 +449,6 @@ public class AtBConfiguration implements Serializable {
 	
 	private void loadContractGenerationNodeFromXml(Node node) {
 	    final String METHOD_NAME = "loadContractGenerationNodeFromXml(Node)"; //$NON-NLS-1$
-		SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		
 		NodeList nl = node.getChildNodes();
 		for (int i = 0; i < nl.getLength(); i++) {
@@ -463,16 +460,16 @@ public class AtBConfiguration implements Serializable {
 					Node wn2 = wn.getChildNodes().item(j);
 					switch (wn2.getNodeName()) {
 					case "hall":
-						Date start = null;
-						Date end = null;
+						LocalDate start = null;
+						LocalDate end = null;
 						try {
 							if (wn2.getAttributes().getNamedItem("start") != null) {
-								start = new Date(df.parse(wn2.getAttributes().getNamedItem("start").getTextContent()).getTime());
+								start = MekHqXmlUtil.parseDate(wn2.getAttributes().getNamedItem("start").getTextContent());
 							}
 							if (wn2.getAttributes().getNamedItem("end") != null) {
-								end = new Date(df.parse(wn2.getAttributes().getNamedItem("end").getTextContent()).getTime());
+								end = MekHqXmlUtil.parseDate(wn2.getAttributes().getNamedItem("end").getTextContent());
 							}
-						} catch (ParseException ex) {
+						} catch (DateTimeParseException ex) {
 		                    MekHQ.getLogger().log(getClass(), METHOD_NAME, LogLevel.ERROR,
 		                            "Error parsing date for hiring hall on " + wn2.getTextContent()); //$NON-NLS-1$
 		                    MekHQ.getLogger().log(getClass(), METHOD_NAME, ex);
@@ -556,8 +553,8 @@ public class AtBConfiguration implements Serializable {
 	 * or to the end of the epoch, respectively.
 	 */
 	static class DatedRecord<E> {
-		private Date start;
-		private Date end;
+		private LocalDate start;
+		private LocalDate end;
 		private E value;
 		
 		public DatedRecord() {
@@ -566,37 +563,29 @@ public class AtBConfiguration implements Serializable {
 			value = null;
 		}
 		
-		public DatedRecord(Date s, Date e, E v) {
+		public DatedRecord(LocalDate s, LocalDate e, E v) {
 			if (s != null) {
-				start = new Date(s.getTime());
+				start = s;
 			}
 			if (e != null) {
-				end = new Date(e.getTime());
+				end = e;
 			}
 			value = v;
 		}
 		
-		public void setStart(Date s) {
-			if (start == null) {
-				start = new Date(s.getTime());
-			} else {
-				start.setTime(s.getTime());
-			}
+		public void setStart(LocalDate s) {
+			start = s;
 		}
 		
-		public Date getStart() {
+		public LocalDate getStart() {
 			return start;
 		}
 	
-		public void setEnd(Date e) {
-			if (end == null) {
-				end = new Date(e.getTime());
-			} else {
-				end.setTime(e.getTime());
-			}
+		public void setEnd(LocalDate e) {
+			end = e;
 		}
 		
-		public Date getEnd() {
+		public LocalDate getEnd() {
 			return end;
 		}
 		
@@ -613,9 +602,9 @@ public class AtBConfiguration implements Serializable {
 		 * @param d
 		 * @return true if d is between the start and end date, inclusive
 		 */
-		public boolean fitsDate(Date d) {
-			return (start == null || !start.after(d))
-					&& (end == null || !end.before(d));
+		public boolean fitsDate(LocalDate d) {
+			return (start == null || !start.isAfter(d))
+					&& (end == null || !end.isBefore(d));
 		}
 	}
 	

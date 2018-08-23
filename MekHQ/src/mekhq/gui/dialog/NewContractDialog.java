@@ -30,8 +30,7 @@ import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.GregorianCalendar;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -48,7 +47,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import megamek.common.util.EncodeControl;
-import mekhq.Utilities;
 import mekhq.campaign.Campaign;
 import mekhq.campaign.finances.Transaction;
 import mekhq.campaign.mission.Contract;
@@ -63,12 +61,14 @@ import mekhq.gui.utilities.JSuggestField;
  * @author  Taharqa
  */
 public class NewContractDialog extends javax.swing.JDialog {
-	private static final long serialVersionUID = -8038099101234445018L;
+    
+    private static final long serialVersionUID = 2L;
+    
     protected Frame frame;
     protected Contract contract;
     protected Campaign campaign;
     protected DecimalFormat formatter;
-    protected SimpleDateFormat dateFormatter;
+    protected DateTimeFormatter dateFormatter;
     private JComboBox<Person> cboNegotiator;
 
     
@@ -80,7 +80,7 @@ public class NewContractDialog extends javax.swing.JDialog {
         contract = new Contract("New Contract", "New Employer");
         contract.calculateContract(campaign);
         formatter = new DecimalFormat();
-        dateFormatter = new SimpleDateFormat("EEEE, MMMM d yyyy");
+        dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMMM d yyyy");
         initComponents();
         setLocationRelativeTo(parent);
     }
@@ -938,7 +938,7 @@ public class NewContractDialog extends javax.swing.JDialog {
     	contract.setType(txtType.getText());
     	contract.setDesc(txtDesc.getText());
     	contract.setCommandRights(choiceCommand.getSelectedIndex());
-    	campaign.getFinances().credit(contract.getTotalAdvanceMonies(), Transaction.C_CONTRACT, "Advance monies for " + contract.getName(), campaign.getCalendar().getTime());
+    	campaign.getFinances().credit(contract.getTotalAdvanceMonies(), Transaction.C_CONTRACT, "Advance monies for " + contract.getName(), campaign.getDate());
     	campaign.addMission(contract);
     	
     	// Negotiator XP
@@ -952,19 +952,17 @@ public class NewContractDialog extends javax.swing.JDialog {
     
     private void changeStartDate() {
         // show the date chooser
-    	GregorianCalendar cal = new GregorianCalendar();
-    	cal.setTime(contract.getStartDate());
-        DateChooser dc = new DateChooser(frame, cal);
+        DateChooser dc = new DateChooser(frame, contract.getStartDate());
         // user can eiter choose a date or cancel by closing
         if (dc.showDateChooser() == DateChooser.OK_OPTION) {
-        	if(campaign.getCalendar().getTime().after(dc.getDate().getTime())) {
+        	if(campaign.getDate().isAfter(dc.getDate())) {
         		JOptionPane.showMessageDialog(frame,
         			    "You cannot choose a start date before the current date.",
         			    "Invalid date",
         			    JOptionPane.ERROR_MESSAGE);
         		return;
         	}
-            contract.setStartDate(dc.getDate().getTime());
+            contract.setStartDate(dc.getDate());
             contract.calculateContract(campaign);
             btnDate.setText(dateFormatter.format(contract.getStartDate()));
         }
@@ -1067,7 +1065,7 @@ public class NewContractDialog extends javax.swing.JDialog {
     protected void doUpdateContract(Object source) {
         if (suggestPlanet.equals(source)) {
             contract.setPlanetId((Planets.getInstance().getPlanetByName(suggestPlanet.getText(),
-                    Utilities.getDateTimeDay(campaign.getCalendar()))).getId());
+                    campaign.getDate())).getId());
             //reset the start date as null so we recalculate travel time
             contract.setStartDate(null);
         } else if (choiceOverhead.equals(source)) {

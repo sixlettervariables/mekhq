@@ -18,14 +18,13 @@
  */
 package mekhq.campaign.universe;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import org.joda.time.DateTime;
 
 /**
  * Finds all planets controlled by a given faction at a particular date and can find all planets
@@ -46,7 +45,7 @@ public class FactionBorders {
      * @param faction The faction to calculate the border for
      * @param when    The date to use to determine planet control.
      */
-    public FactionBorders(Faction faction, DateTime when) {
+    public FactionBorders(Faction faction, LocalDate when) {
         this.faction = faction;
         calculateRegion(when);
     }
@@ -58,7 +57,7 @@ public class FactionBorders {
      * @param when    The date to use to determine planet control.
      * @param region  A collection of planets within a region of space.
      */
-    public FactionBorders(Faction faction, DateTime when, Collection<Planet> region) {
+    public FactionBorders(Faction faction, LocalDate when, Collection<Planet> region) {
         this.faction = faction;
         calculateRegion(when, region);
     }
@@ -69,7 +68,7 @@ public class FactionBorders {
      * 
      * @param when The date for testing faction ownership.
      */
-    public void calculateRegion(DateTime when) {
+    public void calculateRegion(LocalDate when) {
         calculateRegion(when, Planets.getInstance().getPlanets().values());
     }
     
@@ -81,7 +80,7 @@ public class FactionBorders {
      * @param when    The date for testing faction ownership.
      * @param planets The set of planets to include in the region.
      */
-    public void calculateRegion(DateTime when, Collection<Planet> planets) {
+    public void calculateRegion(LocalDate when, Collection<Planet> planets) {
         this.planets = planets.stream()
                 .filter(p -> p.getFactionSet(when).contains(faction))
                 .collect(Collectors.toSet());

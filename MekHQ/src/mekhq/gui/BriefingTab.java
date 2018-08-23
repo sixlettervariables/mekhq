@@ -684,7 +684,7 @@ public final class BriefingTab extends CampaignGuiTab {
         if (chosen.size() > 0) {
             // Ensure that the MegaMek year GameOption matches the campaign year
             GameOptions gameOpts = getCampaign().getGameOptions();
-            int campaignYear = getCampaign().getCalendar().get(Calendar.YEAR);
+            int campaignYear = getCampaign().getGameYear();
             if (gameOpts.intOption("year") != campaignYear) {
                 gameOpts.getOption("year").setValue(campaignYear);
             }

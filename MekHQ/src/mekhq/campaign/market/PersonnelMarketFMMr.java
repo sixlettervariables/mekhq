@@ -19,7 +19,6 @@
 package mekhq.campaign.market;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,7 +44,7 @@ public class PersonnelMarketFMMr implements PersonnelMarketMethod {
 
     @Override
     public List<Person> generatePersonnelForDay(Campaign c) {
-        if (c.getCalendar().get(Calendar.DAY_OF_MONTH) != 1) {
+        if (c.getDate().getDayOfMonth() != 1) {
             return null;
         }
         List<Person> retVal = new ArrayList<>();
@@ -106,7 +105,7 @@ public class PersonnelMarketFMMr implements PersonnelMarketMethod {
 
     @Override
     public List<Person> removePersonnelForDay(Campaign c, List<Person> current) {
-        if (c.getCalendar().get(Calendar.DAY_OF_MONTH) == 1) {
+        if (c.getDate().getDayOfMonth() == 1) {
             return current;
         } else {
             return null;

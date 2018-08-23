@@ -8,11 +8,10 @@ package mekhq.gui.view;
 
 import java.awt.Color;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
-
-import org.joda.time.DateTime;
 
 import megamek.common.util.EncodeControl;
 import mekhq.Utilities;
@@ -97,7 +96,7 @@ public class JumpPathViewPanel extends javax.swing.JPanel {
         pnlPath.setLayout(new java.awt.GridBagLayout());
         int i = 0;
         javax.swing.JLabel lblPlanet;
-        DateTime currentDate = Utilities.getDateTimeDay(campaign.getCalendar());
+        LocalDate currentDate = campaign.getDate();
         for(Planet planet : path.getPlanets()) {
             lblPlanet = new javax.swing.JLabel(planet.getPrintableName(currentDate) + " (" + planet.getRechargeTimeText(currentDate) + ")");
             gridBagConstraints = new java.awt.GridBagConstraints();
@@ -133,7 +132,7 @@ public class JumpPathViewPanel extends javax.swing.JPanel {
         lblCost = new javax.swing.JLabel();
         txtCost = new javax.swing.JTextArea();
         
-        DateTime currentDate = Utilities.getDateTimeDay(campaign.getCalendar());
+        LocalDate currentDate = campaign.getDate();
         String startName = (path.getFirstPlanet() == null) ? "?" : path.getFirstPlanet().getPrintableName(currentDate);
         String endName = (path.getLastPlanet() == null) ? "?" : path.getLastPlanet().getPrintableName(currentDate);
         

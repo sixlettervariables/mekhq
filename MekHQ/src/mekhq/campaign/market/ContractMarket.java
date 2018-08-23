@@ -23,13 +23,12 @@ package mekhq.campaign.market;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Set;
 
-import org.joda.time.DateTime;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
@@ -38,7 +37,6 @@ import megamek.common.Compute;
 import megamek.common.logging.LogLevel;
 import mekhq.MekHQ;
 import mekhq.MekHqXmlUtil;
-import mekhq.Utilities;
 import mekhq.Version;
 import mekhq.campaign.Campaign;
 import mekhq.campaign.JumpPath;
@@ -152,7 +150,7 @@ public class ContractMarket implements Serializable {
 	}
 
 	public void generateContractOffers(Campaign campaign, boolean newCampaign) {
-		if ((method == TYPE_ATBMONTHLY && campaign.getCalendar().get(Calendar.DAY_OF_MONTH) == 1) ||
+		if ((method == TYPE_ATBMONTHLY && campaign.getDate().getDayOfMonth() == 1) ||
 				newCampaign) {
 			Contract[] list = contracts.toArray(new Contract[contracts.size()]);
 			for (Contract c : list) {
@@ -170,7 +168,7 @@ public class ContractMarket implements Serializable {
 
 			int numContracts = Compute.d6() - 4 + unitRatingMod;
 
-			DateTime currentDate = Utilities.getDateTimeDay(campaign.getCalendar());
+			LocalDate currentDate = campaign.getDate();
 			Set<Faction> currentFactions =
 					campaign.getCurrentPlanet().getFactionSet(currentDate);
 			boolean inMinorFaction = true;
@@ -281,7 +279,7 @@ public class ContractMarket implements Serializable {
 				int roll = Compute.d6(2);
 				if (roll >= 10) {
 					AtBContract sub = generateAtBSubcontract(campaign, contract, unitRatingMod);
-					if (sub.getEndingDate().before(contract.getEndingDate())) {
+					if (sub.getEndingDate().isBefore(contract.getEndingDate())) {
 						contracts.add(sub);
 					}
 				}
@@ -327,7 +325,7 @@ public class ContractMarket implements Serializable {
 				+"-"
 				+Contract.generateRandomContractName()
 				+"-"
-				+(new SimpleDateFormat("yyyyMM")).format(campaign.calendar.getTime()));
+				+DateTimeFormatter.ofPattern("yyyyMM").format(campaign.getDate()));
         lastId++;
         contract.setId(lastId);
         contractIds.put(lastId, contract);
@@ -402,8 +400,8 @@ public class ContractMarket implements Serializable {
 			}			
 		}
 
-		setAllyRating(contract, isAttacker, campaign.getCalendar().get(Calendar.YEAR));
-		setEnemyRating(contract, isAttacker, campaign.getCalendar().get(Calendar.YEAR));
+		setAllyRating(contract, isAttacker, campaign.getGameYear());
+		setEnemyRating(contract, isAttacker, campaign.getGameYear());
 
 		if (contract.getMissionType() == AtBContract.MT_CADREDUTY) {
 			contract.setAllySkill(RandomSkillsGenerator.L_GREEN);
@@ -468,7 +466,7 @@ public class ContractMarket implements Serializable {
         	boolean factionValid = false;
         	for (Planet p : Planets.getInstance().getNearbyPlanets(campaign.getCurrentPlanet(), 30)) {
         		if (factionValid) break;
-        		for (Faction f : p.getFactionSet(Utilities.getDateTimeDay(campaign.getCalendar()))) {
+        		for (Faction f : p.getFactionSet(campaign.getDate())) {
         			if (f.getShortName().equals(contract.getEnemyCode())) {
         				factionValid = true;
         				break;
@@ -484,8 +482,8 @@ public class ContractMarket implements Serializable {
 				(contract.getMissionType() == AtBContract.MT_RELIEFDUTY && Compute.d6() < 4) ||
 				contract.getEnemyCode().equals("REB"));
         contract.setPlanetId(parent.getPlanetId());
-		setAllyRating(contract, isAttacker, campaign.getCalendar().get(Calendar.YEAR));
-		setEnemyRating(contract, isAttacker, campaign.getCalendar().get(Calendar.YEAR));
+		setAllyRating(contract, isAttacker, campaign.getGameYear());
+		setEnemyRating(contract, isAttacker, campaign.getGameYear());
 
 		if (contract.getMissionType() == AtBContract.MT_CADREDUTY) {
 			contract.setAllySkill(RandomSkillsGenerator.L_GREEN);

@@ -23,11 +23,11 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -61,7 +61,7 @@ public class FactionBordersTest {
 
     @Test
     public void testGetBorderPlanetsFactionBorders() {
-        DateTime when = new DateTime();
+        LocalDate when = LocalDate.of(3025, 1, 1);
         List<Planet> planets = new ArrayList<>();
         for (int x = -3; x <= 3; x += 2) {
             for (int y = -2; y <= 2; y += 2) {

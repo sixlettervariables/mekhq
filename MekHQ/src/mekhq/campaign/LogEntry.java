@@ -23,8 +23,7 @@
 package mekhq.campaign;
 
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.Objects;
 
 import org.w3c.dom.Node;
@@ -39,25 +38,25 @@ import mekhq.MekHqXmlUtil;
  */
 public class LogEntry implements Cloneable, MekHqXmlSerializable {
 
-    public LogEntry(Date date, String desc) {
+    public LogEntry(LocalDate date, String desc) {
         this(date, desc, null);
     }
     
-    public LogEntry(Date date, String desc, String type) {
+    public LogEntry(LocalDate date, String desc, String type) {
         this.date = date;
         this.desc = desc != null ? desc : ""; //$NON-NLS-1$
         this.type = type;
     }
 
-    private Date date;
+    private LocalDate date;
     private String desc; // non-null
     private String type;
 
-    public Date getDate() {
+    public LocalDate getDate() {
         return date;
     }
     
-    public void setDate(Date date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
     
@@ -91,9 +90,9 @@ public class LogEntry implements Cloneable, MekHqXmlSerializable {
     public static LogEntry generateInstanceFromXML(Node wn) {
         final String METHOD_NAME = "generateInstanceFromXML(Node)"; //$NON-NLS-1$
 
-        Date   date = null;
-        String desc = null;
-        String type = null;
+        LocalDate date = null;
+        String desc    = null;
+        String type    = null;
 
         try {
             NodeList nl = wn.getChildNodes();
@@ -119,7 +118,7 @@ public class LogEntry implements Cloneable, MekHqXmlSerializable {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        if (null != date) sb.append("[").append(new SimpleDateFormat("yyyy-MM-dd").format(date)).append("] "); //$NON-NLS-1$ //$NON-NLS-2$
+        if (null != date) sb.append("[").append(date.toString()).append("] "); //$NON-NLS-1$ //$NON-NLS-2$
         sb.append(desc);
         if (null != type) sb.append(" (").append(type).append(")");  //$NON-NLS-1$//$NON-NLS-2$
         return sb.toString();

@@ -21,8 +21,7 @@ package mekhq.campaign.personnel;
 
 import java.io.PrintWriter;
 import java.io.Serializable;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
 
 import mekhq.MekHqXmlSerializable;
 import mekhq.MekHqXmlUtil;
@@ -40,7 +39,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name="award")
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Award implements MekHqXmlSerializable, Comparable<Award>, Serializable {
-    private static final long serialVersionUID = -3290927068079223579L;
+    private static final long serialVersionUID = 2L;
 
     @XmlElement(name = "name")
     private String name;
@@ -70,7 +69,7 @@ public class Award implements MekHqXmlSerializable, Comparable<Award>, Serializa
 
     private String set;
 
-    private Date date;
+    private LocalDate date;
 
     public Award(){}
 
@@ -125,17 +124,16 @@ public class Award implements MekHqXmlSerializable, Comparable<Award>, Serializa
         return description;
     }
 
-    public void setDate(Date date){
+    public void setDate(LocalDate date){
         this.date = date;
     }
 
-    public Date getDate(){
+    public LocalDate getDate(){
         return date;
     }
 
     public String getFormatedDate(){
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-        return df.format(date.getTime());
+        return date.toString();
     }
 
 
@@ -161,7 +159,7 @@ public class Award implements MekHqXmlSerializable, Comparable<Award>, Serializa
      * @param date when the award was given
      * @return award with new date
      */
-    public Award createCopy(Date date){
+    public Award createCopy(LocalDate date){
         Award awardCopy = new Award(this.name, this.set, this.description, this.medal, this.ribbon, this.misc, this.xp,
                 this.edge, this.stackable, this.id);
         awardCopy.setDate(date);
@@ -188,7 +186,7 @@ public class Award implements MekHqXmlSerializable, Comparable<Award>, Serializa
      * @param date is the date this award was given
      * @return true if it is equal
      */
-    public boolean equals(String setName, String name, Date date){
+    public boolean equals(String setName, String name, LocalDate date){
         return (this.set.equals(setName) && this.name.equals(name) && this.date.equals(date));
     }
 

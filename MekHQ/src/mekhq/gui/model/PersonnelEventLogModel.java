@@ -3,9 +3,9 @@ package mekhq.gui.model;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.FontMetrics;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -29,14 +29,14 @@ public class PersonnelEventLogModel extends DataTableModel {
     public final static int COL_TEXT = 1;
 
     private ResourceBundle resourceMap;
-    private SimpleDateFormat shortDateFormat;
+    private DateTimeFormatter shortDateFormat;
     private final int dateTextWidth;
 
     public PersonnelEventLogModel() {
         resourceMap = ResourceBundle.getBundle("mekhq.resources.PersonnelEventLogModel", new EncodeControl()); //$NON-NLS-1$
-        shortDateFormat = new SimpleDateFormat(resourceMap.getString("date.format")); //$NON-NLS-1$
+        shortDateFormat = DateTimeFormatter.ofPattern(resourceMap.getString("date.format")); //$NON-NLS-1$
         data = new ArrayList<Kill>();
-        dateTextWidth = getRenderer().metrics.stringWidth(shortDateFormat.format(new Date())) + 10;
+        dateTextWidth = getRenderer().metrics.stringWidth(shortDateFormat.format(LocalDate.now())) + 10;
     }
    
     @Override

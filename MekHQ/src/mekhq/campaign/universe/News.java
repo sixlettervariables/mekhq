@@ -1,6 +1,7 @@
 package mekhq.campaign.universe;
 
 import java.io.FileInputStream;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -12,7 +13,6 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.parsers.DocumentBuilder;
 
-import org.joda.time.DateTime;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -50,7 +50,7 @@ public class News {
     }
 
     //we need two hashes - one to access by date and the other by an id
-    private Map<DateTime, List<NewsItem>> archive;
+    private Map<LocalDate, List<NewsItem>> archive;
     private Map<Integer, NewsItem> news;
     
     public News(int year, long seed) {
@@ -63,7 +63,7 @@ public class News {
         }
     }
     
-    public List<NewsItem> fetchNewsFor(DateTime d) {
+    public List<NewsItem> fetchNewsFor(LocalDate d) {
         synchronized(LOADING_LOCK) {
             if(archive.containsKey(d)) {
                 return archive.get(d);

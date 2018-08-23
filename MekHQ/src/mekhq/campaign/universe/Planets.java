@@ -28,6 +28,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Writer;
 import java.text.ParseException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -52,7 +53,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.joda.time.DateTime;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
@@ -128,7 +128,7 @@ public class Planets {
     
     // HPG Network cache (to not recalculate all the damn time)
     private Collection<Planets.HPGLink> hpgNetworkCache = null;
-    private DateTime hpgNetworkCacheDate = null;
+    private LocalDate hpgNetworkCacheDate = null;
     
     private Thread loader;
     private boolean initialized = false;
@@ -182,7 +182,7 @@ public class Planets {
     }
     
     /** Return the planet by given name at a given time point */
-    public Planet getPlanetByName(String name, DateTime when) {
+    public Planet getPlanetByName(String name, LocalDate when) {
         if(null == name) {
             return null;
         }
@@ -202,7 +202,7 @@ public class Planets {
         return null;
     }
 
-    public List<NewsItem> getPlanetaryNews(DateTime when) {
+    public List<NewsItem> getPlanetaryNews(LocalDate when) {
         List<NewsItem> news = new ArrayList<>();
         for(Planet planet : planetList.values()) {
             if(null != planet) {
@@ -224,7 +224,7 @@ public class Planets {
         hpgNetworkCacheDate = null;
     }
     
-    public Collection<Planets.HPGLink> getHPGNetwork(DateTime when) {
+    public Collection<Planets.HPGLink> getHPGNetwork(LocalDate when) {
         if((null != when) && when.equals(hpgNetworkCacheDate)) {
             return hpgNetworkCache;
         }
@@ -409,17 +409,17 @@ public class Planets {
         // this is a dirty dirty hack to give specific dates to "waves" of
         // Operation Revival and Operation Bulldog, which occurred in 3050 and 3059 respectively
         // and resulted in a lot of rapid territorial changes
-        Map<Integer, List<DateTime>> yearMonths = new HashMap<>();
-        yearMonths.put(3050, new ArrayList<DateTime>());
-        yearMonths.get(3050).add(new DateTime(3050, 3, 7, 0, 0, 0, 0)); // wave 1
-        yearMonths.get(3050).add(new DateTime(3050, 5, 1, 0, 0, 0, 0)); // wave 2
-        yearMonths.get(3050).add(new DateTime(3050, 6, 1, 0, 0, 0, 0)); // wave 3
+        Map<Integer, List<LocalDate>> yearMonths = new HashMap<>();
+        yearMonths.put(3050, new ArrayList<LocalDate>());
+        yearMonths.get(3050).add(LocalDate.of(3050, 3, 7)); // wave 1
+        yearMonths.get(3050).add(LocalDate.of(3050, 5, 1)); // wave 2
+        yearMonths.get(3050).add(LocalDate.of(3050, 6, 1)); // wave 3
         
-        yearMonths.put(3059, new ArrayList<DateTime>());
-        yearMonths.get(3059).add(new DateTime(3059, 5, 20, 0, 0, 0, 0)); // wave 1
-        yearMonths.get(3059).add(new DateTime(3059, 6, 26, 0, 0, 0, 0)); // wave 2
-        yearMonths.get(3059).add(new DateTime(3059, 8, 13, 0, 0, 0, 0)); // wave 3
-        yearMonths.get(3059).add(new DateTime(3059, 9, 18, 0, 0, 0, 0)); // wave 4
+        yearMonths.put(3059, new ArrayList<LocalDate>());
+        yearMonths.get(3059).add(LocalDate.of(3059, 5, 20)); // wave 1
+        yearMonths.get(3059).add(LocalDate.of(3059, 6, 26)); // wave 2
+        yearMonths.get(3059).add(LocalDate.of(3059, 8, 13)); // wave 3
+        yearMonths.get(3059).add(LocalDate.of(3059, 9, 18)); // wave 4
         
         // this contains the current indices of the 3050/3059 maps
         Map<Integer, Integer> yearMonthIndex = new HashMap<>();
@@ -437,13 +437,13 @@ public class Planets {
             // parse the first line. Skip the first three items, then add all the rest to an array of DateTime objects
             String firstLine = br.readLine();
             String[] yearElements = firstLine.split("\t");
-            List<DateTime> years = new ArrayList<>();
+            List<LocalDate> years = new ArrayList<>();
             for(int x = 3; x < yearElements.length; x++) { 
                 // note that there are a couple of instances where years are listed multiple times
                 // "Operation Revival" and "Operation Bulldog"
                 // so we employ a dirty hack to get multiple dates within the same year,
                 // since the SUCS data does not contain the actual dates
-                DateTime year;
+                LocalDate year;
                 
                 int parsedYear = Integer.parseInt(yearElements[x]);
                 if((parsedYear == 3050) || (parsedYear == 3059)) {
@@ -454,7 +454,7 @@ public class Planets {
 
                     yearMonthIndex.put(parsedYear, ++yearIndex);
                 } else {
-                    year = new DateTime(Integer.parseInt(yearElements[x]), 1, 1, 0, 0, 0, 0);
+                    year = LocalDate.of(Integer.parseInt(yearElements[x]), 1, 1);
                 }
                 
                 years.add(year);

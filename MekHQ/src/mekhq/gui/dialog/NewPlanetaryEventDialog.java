@@ -10,6 +10,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.event.KeyEvent;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -35,10 +37,6 @@ import javax.swing.KeyStroke;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 
 import megamek.common.EquipmentType;
 import megamek.common.PlanetaryConditions;
@@ -77,14 +75,14 @@ public class NewPlanetaryEventDialog extends JDialog {
     private static final String FIELD_GOVERNMENT = "government"; //$NON-NLS-1$
     private static final String FIELD_CONTROL = "control"; //$NON-NLS-1$
     
-    private final static DateTimeFormatter DATE_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd"); //$NON-NLS-1$
+    private final static DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ISO_LOCAL_DATE; //$NON-NLS-1$
     private final static SocioIndustrialDataAdapter SOCIO_INDUSTRIAL_ADAPTER = new SocioIndustrialDataAdapter();
     
     ResourceBundle resourceMap;
 
     private final Planet planet;
     
-    private DateTime date;
+    private LocalDate date;
     
     private List<Planet.PlanetaryEvent> changedEvents = null;
 
@@ -158,7 +156,7 @@ public class NewPlanetaryEventDialog extends JDialog {
         super(parent, modal);
         this.planet = new Planet(Objects.requireNonNull(planet).getId());
         this.planet.copyDataFrom(planet);
-        this.date = Utilities.getDateTimeDay(campaign.getCalendar());
+        this.date = campaign.getDate();
         initComponents();
         setLocationRelativeTo(parent);
     }
@@ -217,9 +215,9 @@ public class NewPlanetaryEventDialog extends JDialog {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                DateChooser dc = new DateChooser((content instanceof Frame) ? (Frame) content : null, date.toGregorianCalendar());
+                DateChooser dc = new DateChooser((content instanceof Frame) ? (Frame) content : null, date);
                 if (dc.showDateChooser() == DateChooser.OK_OPTION) {
-                    date = Utilities.getDateTimeDay(dc.getDate());
+                    date = dc.getDate();
                     updateDate();
                 }
             }
@@ -835,7 +833,7 @@ public class NewPlanetaryEventDialog extends JDialog {
     }
     
     private void updateDate() {
-        dateButton.setText(date.toString(DATE_FORMATTER));
+        dateButton.setText(date.format(DATE_FORMATTER));
         Planet.PlanetaryEvent event = getCurrentEvent();
 
         messageField.setText((null != event) ? event.message : null);

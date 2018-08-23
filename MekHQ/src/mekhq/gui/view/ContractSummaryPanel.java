@@ -25,7 +25,7 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -36,7 +36,6 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import megamek.common.util.EncodeControl;
-import mekhq.Utilities;
 import mekhq.campaign.Campaign;
 import mekhq.campaign.JumpPath;
 import mekhq.campaign.market.ContractMarket;
@@ -58,6 +57,9 @@ public class ContractSummaryPanel extends JPanel {
 	 * 
 	 */
 	private static final long serialVersionUID = 8773615661962644614L;
+
+	private DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+
 	private Campaign campaign;
 	private Contract contract;
 	private boolean allowRerolls;
@@ -206,8 +208,6 @@ public class ContractSummaryPanel extends JPanel {
 		java.awt.GridBagConstraints gridBagConstraints;
 		mainPanel.setLayout(new java.awt.GridBagLayout());
 
-		SimpleDateFormat shortDateFormat = new SimpleDateFormat("MM/dd/yyyy");
-
 		int y = 0;
 
 		lblName.setName("lblName"); // NOI18N
@@ -311,7 +311,7 @@ public class ContractSummaryPanel extends JPanel {
 		mainPanel.add(lblLocation, gridBagConstraints);
 
 		txtLocation.setName("txtLocation"); // NOI18N
-        txtLocation.setText(contract.getPlanetName(Utilities.getDateTimeDay(campaign.getCalendar())));
+        txtLocation.setText(contract.getPlanetName(campaign.getDate()));
 		txtLocation.setEditable(false);
 		txtLocation.setLineWrap(true);
 		txtLocation.setWrapStyleWord(true);
@@ -336,7 +336,7 @@ public class ContractSummaryPanel extends JPanel {
 
 			txtDistance.setName("txtDistance"); // NOI18N
 			JumpPath path = campaign.calculateJumpPath(campaign.getCurrentPlanet(), contract.getPlanet());
-			int days = (int)Math.ceil((path).getTotalTime(Utilities.getDateTimeDay(contract.getStartDate()), campaign.getLocation().getTransitTime()));
+			int days = (int)Math.ceil((path).getTotalTime(contract.getStartDate(), campaign.getLocation().getTransitTime()));
 			int jumps = path.getJumps();
             if (campaign.getCurrentPlanet().getId().equals(contract.getPlanetId())
                     && campaign.getLocation().isOnPlanet()) {

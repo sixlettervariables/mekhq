@@ -253,7 +253,7 @@ public class ShipSearchDialog extends JDialog {
 		return gui.getCampaign().getMissions().stream().anyMatch(m ->
 			m.isActive()
 			&& m instanceof Contract
-			&& ((Contract)m).getStartDate().before(gui.getCampaign().getDate())
+			&& ((Contract)m).getStartDate().isBefore(gui.getCampaign().getDate())
 		);
 	}
 

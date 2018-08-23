@@ -1,6 +1,6 @@
 package mekhq.gui.model;
 
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 import javax.swing.SwingConstants;
@@ -21,6 +21,8 @@ public class ScenarioTableModel extends DataTableModel {
     private final static int COL_DATE       = 2;
     private final static int COL_ASSIGN     = 3;
     private final static int N_COL          = 4;
+
+    private DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
     public ScenarioTableModel(Campaign c) {
         data = new ArrayList<Scenario>();
@@ -64,7 +66,6 @@ public class ScenarioTableModel extends DataTableModel {
             if(null == scenario.getDate()) {
                 return "-";
             } else {
-                SimpleDateFormat shortDateFormat = new SimpleDateFormat("MM/dd/yyyy");
                 return shortDateFormat.format(scenario.getDate());
             }
         }

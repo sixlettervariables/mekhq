@@ -219,7 +219,7 @@ public class MekLabTab extends CampaignGuiTab {
         } catch (EntityLoadingException ex) {
             MekHQ.getLogger().log(getClass(), "loadUnit(Unit)", ex); //$NON-NLS-1$
         }
-        entity.setYear(unit.campaign.getCalendar().get(Calendar.YEAR));
+        entity.setYear(unit.campaign.getGameYear());
         UnitUtil.updateLoadedUnit(entity);
         entity.setModel(entity.getModel() + " Mk II");
         removeAll();
@@ -253,7 +253,7 @@ public class MekLabTab extends CampaignGuiTab {
         } catch (EntityLoadingException ex) {
             MekHQ.getLogger().log(getClass(), "resetUnit()", ex); //$NON-NLS-1$
         }
-        entity.setYear(unit.campaign.getCalendar().get(Calendar.YEAR));
+        entity.setYear(unit.campaign.getGameYear());
         UnitUtil.updateLoadedUnit(entity);
         removeAll();
         labPanel = getCorrectLab(entity);

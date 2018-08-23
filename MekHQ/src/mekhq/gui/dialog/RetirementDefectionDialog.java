@@ -11,6 +11,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.ResourceBundle;
@@ -169,7 +170,7 @@ public class RetirementDefectionDialog extends JDialog {
         	}
         	if (null == contract) {
         		instructions += "\n\nDays since last retirement roll: "
-        				+ Utilities.countDaysBetween(rdTracker.getLastRetirementRoll().getTime(),
+        				+ ChronoUnit.DAYS.between(rdTracker.getLastRetirementRoll(),
         						hqView.getCampaign().getDate());
         	}
         	txtInstructions.setText(instructions);

@@ -32,12 +32,15 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.EventObject;
-import java.util.GregorianCalendar;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -120,12 +123,12 @@ import mekhq.module.api.PersonnelMarketMethod;
  * @author Jay Lawson <jaylawson39 at yahoo.com>
  */
 public class CampaignOptionsDialog extends javax.swing.JDialog {
-    private static final long serialVersionUID = 1935043247792962964L;
+    private static final long serialVersionUID = 2L;
     private Campaign campaign;
     private CampaignOptions options;
     private RandomSkillPreferences rskillPrefs;
-    private GregorianCalendar date;
-    private SimpleDateFormat dateFormat;
+    private LocalDate date;
+    private DateTimeFormatter dateFormat;
     private Frame frame;
     private String camoCategory;
     private String camoFileName;
@@ -456,7 +459,7 @@ public class CampaignOptionsDialog extends javax.swing.JDialog {
         //this is a hack but I have no idea what is going on here
         this.frame = parent;
         this.date = campaign.calendar;
-        dateFormat = new SimpleDateFormat("EEEE, MMMM d yyyy");
+        dateFormat = DateTimeFormatter.ofPattern("EEEE, MMMM d yyyy");
         this.camoCategory = campaign.getCamoCategory();
         this.camoFileName = campaign.getCamoFileName();
         this.colorIndex = campaign.getColorIndex();
@@ -709,11 +712,11 @@ public class CampaignOptionsDialog extends javax.swing.JDialog {
         factionModel = new SortedComboBoxModel<String>();
         for (String sname : Faction.choosableFactionCodes) {
             Faction f = Faction.getFaction(sname);
-            if (f.validIn(date.get(Calendar.YEAR))) {
-                factionModel.addElement(f.getFullName(date.get(Calendar.YEAR)));
+            if (f.validIn(date.getYear())) {
+                factionModel.addElement(f.getFullName(date.getYear()));
             }
         }
-        factionModel.setSelectedItem(campaign.getFaction().getFullName(date.get(Calendar.YEAR)));
+        factionModel.setSelectedItem(campaign.getFaction().getFullName(date.getYear()));
         comboFaction.setModel(factionModel);
         comboFaction.setMinimumSize(new java.awt.Dimension(400, 30));
         comboFaction.setName("comboFaction"); // NOI18N
@@ -4240,7 +4243,7 @@ public class CampaignOptionsDialog extends javax.swing.JDialog {
     }
 
     private void switchFaction() {
-        String factionCode = Faction.getFactionFromFullNameAndYear(String.valueOf(comboFaction.getSelectedItem()), date.get(Calendar.YEAR))
+        String factionCode = Faction.getFactionFromFullNameAndYear(String.valueOf(comboFaction.getSelectedItem()), date.getYear())
                                     .getNameGenerator();
         boolean found = false;
         for (Iterator<String> i = campaign.getRNG().getFactions(); i.hasNext(); ) {
@@ -4416,15 +4419,15 @@ public class CampaignOptionsDialog extends javax.swing.JDialog {
 
     private void updateOptions() {
     	campaign.setName(txtName.getText());
-    	campaign.calendar = date;
+    	campaign.setDate(date);
         // Ensure that the MegaMek year GameOption matches the campaign year
         GameOptions gameOpts = campaign.getGameOptions();
-        int campaignYear = campaign.getCalendar().get(Calendar.YEAR);
+        int campaignYear = campaign.getGameYear();
         if (gameOpts.intOption("year") != campaignYear) {
             gameOpts.getOption("year").setValue(campaignYear);
         }
         campaign.setFactionCode(Faction.getFactionFromFullNameAndYear
-        		(String.valueOf(comboFaction.getSelectedItem()), date.get(Calendar.YEAR)).getShortName());
+        		(String.valueOf(comboFaction.getSelectedItem()), date.getYear()).getShortName());
         if (null != comboFactionNames.getSelectedItem()) {
             campaign.getRNG().setChosenFaction((String) comboFactionNames.getSelectedItem());
         }
@@ -4767,11 +4770,11 @@ public class CampaignOptionsDialog extends javax.swing.JDialog {
             factionModel = new SortedComboBoxModel<String>();
             for (String sname : Faction.choosableFactionCodes) {
                 Faction f = Faction.getFaction(sname);
-                if (f.validIn(date.get(Calendar.YEAR))) {
-                    factionModel.addElement(f.getFullName(date.get(Calendar.YEAR)));
+                if (f.validIn(date.getYear())) {
+                    factionModel.addElement(f.getFullName(date.getYear()));
                 }
             }
-            factionModel.setSelectedItem(campaign.getFaction().getFullName(date.get(Calendar.YEAR)));
+            factionModel.setSelectedItem(campaign.getFaction().getFullName(date.getYear()));
             comboFaction.setModel(factionModel);
         }
     }//GEN-LAST:event_btnDateActionPerformed
@@ -4901,7 +4904,7 @@ public class CampaignOptionsDialog extends javax.swing.JDialog {
     }
 
     public String getDateAsString() {
-        return dateFormat.format(date.getTime());
+        return dateFormat.format(date);
     }
 
     public void setCamoIcon() {

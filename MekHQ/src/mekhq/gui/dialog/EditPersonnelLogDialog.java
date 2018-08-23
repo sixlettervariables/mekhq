@@ -26,7 +26,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridLayout;
-import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
@@ -49,7 +49,11 @@ import mekhq.campaign.personnel.Person;
  * @author  Taharqa
  */
 public class EditPersonnelLogDialog extends javax.swing.JDialog {
+
 	private static final long serialVersionUID = -8038099101234445018L;
+
+	private DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+
     private Frame frame;
     private Campaign campaign;
     private Person person;
@@ -246,7 +250,6 @@ public class EditPersonnelLogDialog extends javax.swing.JDialog {
 	        	entry = (LogEntry)data.get(row);
 	        }
 			if(col == COL_DATE) {
-				SimpleDateFormat shortDateFormat = new SimpleDateFormat("MM/dd/yyyy");
 				return shortDateFormat.format(entry.getDate());
 			}
 			if(col == COL_DESC) {

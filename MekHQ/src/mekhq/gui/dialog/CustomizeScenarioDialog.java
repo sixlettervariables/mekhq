@@ -26,11 +26,10 @@ import java.awt.Dimension;
 import java.awt.Frame;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
-import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.ResourceBundle;
 
 import javax.swing.BorderFactory;
@@ -56,14 +55,14 @@ import mekhq.gui.model.LootTableModel;
  * @author  Taharqa
  */
 public class CustomizeScenarioDialog extends javax.swing.JDialog {
-	private static final long serialVersionUID = -8038099101234445018L;
+	private static final long serialVersionUID = 2L;
     private Frame frame;
     private Scenario scenario;
     private Mission mission;
     private Campaign campaign;
     private boolean newScenario;
-    private Date date;
-    private SimpleDateFormat dateFormatter;
+    private LocalDate date;
+    private DateTimeFormatter dateFormatter;
 
     private LootTableModel lootModel;
     
@@ -103,9 +102,9 @@ public class CustomizeScenarioDialog extends javax.swing.JDialog {
         campaign = c;
         date = scenario.getDate();
         if(null == date) {
-        	date = campaign.getCalendar().getTime();
+        	date = campaign.getDate();
         }
-        dateFormatter = new SimpleDateFormat("MM/dd/yyyy");
+        dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
         loots = new ArrayList<Loot>();
         for(Loot loot : scenario.getLoot()) {
             loots.add((Loot)loot.clone());
@@ -316,13 +315,11 @@ public class CustomizeScenarioDialog extends javax.swing.JDialog {
     
     private void changeDate() {
         // show the date chooser
-    	GregorianCalendar cal = new GregorianCalendar();
-    	cal.setTime(date);
-        DateChooser dc = new DateChooser(frame, cal);
+        DateChooser dc = new DateChooser(frame, date);
         // user can eiter choose a date or cancel by closing
         if (dc.showDateChooser() == DateChooser.OK_OPTION) {
         	if (scenario.isCurrent()) {
-        		if (dc.getDate().getTime().before(campaign.getCalendar().getTime())) {
+        		if (dc.getDate().isBefore(campaign.getDate())) {
             		JOptionPane.showMessageDialog(frame,
             			    "You cannot choose a date before the current date for a pending battle.",
             			    "Invalid date",
@@ -330,14 +327,13 @@ public class CustomizeScenarioDialog extends javax.swing.JDialog {
             		return;        			
         		} else {
         			//Calendar math necessitated by variations in locales
-        			GregorianCalendar nextMonday = new GregorianCalendar();
-        			nextMonday.setTime(campaign.getDate());
-        			nextMonday.add(Calendar.DAY_OF_MONTH, 1);
-        			while (nextMonday.get(Calendar.DAY_OF_WEEK) != Calendar.MONDAY) {
-        				nextMonday.add(Calendar.DAY_OF_MONTH, 1);
+        			LocalDate nextMonday = campaign.getDate().plusWeeks(1);
+        			while (nextMonday.getDayOfWeek() != DayOfWeek.MONDAY) {
+        				nextMonday = nextMonday.minusDays(
+                            nextMonday.getDayOfWeek().ordinal() - DayOfWeek.MONDAY.ordinal());
         			}
         			//
-        			if (!dc.getDate().getTime().before(nextMonday.getTime())) {
+        			if (!dc.getDate().isBefore(nextMonday)) {
                 		JOptionPane.showMessageDialog(frame,
                 			    "You cannot choose a date beyond the current week.",
                 			    "Invalid date",
@@ -345,14 +341,14 @@ public class CustomizeScenarioDialog extends javax.swing.JDialog {
                 		return;        			        				
         			}
         		}
-        	} else if (dc.getDate().getTime().after(campaign.getCalendar().getTime())) {
+        	} else if (dc.getDate().isAfter(campaign.getDate())) {
         		JOptionPane.showMessageDialog(frame,
         			    "You cannot choose a date after the current date.",
         			    "Invalid date",
         			    JOptionPane.ERROR_MESSAGE);
         		return;
         	}
-            date = dc.getDate().getTime();
+            date = dc.getDate();
             btnDate.setText(dateFormatter.format(date));
         }
     }

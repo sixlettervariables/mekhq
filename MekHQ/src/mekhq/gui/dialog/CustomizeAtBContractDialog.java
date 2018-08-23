@@ -278,7 +278,7 @@ public class CustomizeAtBContractDialog extends JDialog {
         leftPanel.add(lblPlanetName, gbc);
         
         suggestPlanet = new JSuggestField(this, campaign.getPlanetNames());       
-        suggestPlanet.setText(contract.getPlanetName(Utilities.getDateTimeDay(campaign.getCalendar())));
+        suggestPlanet.setText(contract.getPlanetName(campaign.getDate()));
         gbc.gridx = 1;
         gbc.gridy = y++;
         gbc.gridwidth = 2;
@@ -623,7 +623,7 @@ public class CustomizeAtBContractDialog extends JDialog {
     	contract.setEnemyColorIndex(enemyColorIndex);
         
     	Planet canonPlanet = Planets.getInstance().getPlanetByName(suggestPlanet.getText(),
-                Utilities.getDateTimeDay(campaign.getCalendar()));
+                campaign.getDate());
         
         if(canonPlanet != null) {
             contract.setPlanetId(canonPlanet.getId());
