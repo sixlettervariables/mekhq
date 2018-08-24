@@ -58,7 +58,7 @@ import mekhq.campaign.rating.IUnitRating;
 public class NewLoanDialog extends javax.swing.JDialog implements ActionListener, ChangeListener {
     private static final long serialVersionUID = -8038099101234445018L;
 
-    private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+    private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
     private Frame frame;
     private Loan loan;

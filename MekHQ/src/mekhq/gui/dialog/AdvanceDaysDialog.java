@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
 import java.util.GregorianCalendar;
 import java.util.ResourceBundle;
 import java.util.Calendar;
@@ -95,7 +96,7 @@ public class AdvanceDaysDialog extends JDialog implements ActionListener {
                 //Use java.time to get the number of days to next month.
                 //We already need Java 8 anyway, and this is much easier and more accurate.
                 LocalDate cal = gui.getCampaign().getDate();
-                days = (int)Math.abs(ChronoUnit.DAYS.between(cal, cal.plusMonths(1)));
+                days = (int)Math.abs(ChronoUnit.DAYS.between(cal, cal.with(TemporalAdjusters.firstDayOfNextMonth())));
             }
             for (int numDays = days; numDays > 0; numDays--) {
                 spnDays.setValue(numDays);

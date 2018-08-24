@@ -52,7 +52,7 @@ public class EditKillLogDialog extends javax.swing.JDialog {
 
 	private static final long serialVersionUID = 6995319032267472795L;
 	
-	private DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+	private static final DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
 	private Frame frame;
     private Campaign campaign;

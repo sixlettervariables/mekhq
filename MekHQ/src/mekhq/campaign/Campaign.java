@@ -276,8 +276,8 @@ public class Campaign implements Serializable, ITechManager {
 
     // calendar stuff
     public LocalDate calendar;
-    private DateTimeFormatter dateFormat;
-    private DateTimeFormatter shortDateFormat;
+    private static final DateTimeFormatter dateFormat;
+    private static final DateTimeFormatter shortDateFormat;
 
     private String factionCode;
     private int techFactionCode;
@@ -9171,8 +9171,8 @@ public class Campaign implements Serializable, ITechManager {
 
     public boolean checkYearlyRetirements() {
         if (getCampaignOptions().getUseAtB()
-                && ChronoUnit.DAYS.between(getRetirementDefectionTracker()
-                        .getLastRetirementRoll(), getDate()) == 365) {
+                && getRetirementDefectionTracker()
+                        .getLastRetirementRoll().plusYears(1).isEqual(getDate())) {
             Object[] options = { "Show Retirement Dialog", "Not Now" };
             if (JOptionPane.YES_OPTION == JOptionPane
                     .showOptionDialog(

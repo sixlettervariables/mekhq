@@ -35,8 +35,6 @@ import java.io.PrintStream;
 import java.text.NumberFormat;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Properties;
 import java.util.ResourceBundle;
@@ -303,8 +301,7 @@ public class MekHQ implements GameListener {
         msg.append("\t").append(resourceMap.getString("Application.name")) //$NON-NLS-1$ //$NON-NLS-2$
                 .append(" ").append(resourceMap.getString("Application.version")); //$NON-NLS-1$ //$NON-NLS-2$
         if (TIMESTAMP > 0) {
-            msg.append("\n\tCompiled on ").append(
-				LocalDateTime.ofInstant(Instant.ofEpochMilli(TIMESTAMP), ZoneId.systemDefault())); //$NON-NLS-1$
+            msg.append("\n\tCompiled on ").append(Instant.ofEpochMilli(TIMESTAMP)); //$NON-NLS-1$
         }
         msg.append("\n\tToday is ").append(LocalDate.now()); //$NON-NLS-1$
         msg.append("\n\tJava vendor ").append(System.getProperty("java.vendor")); //$NON-NLS-1$ //$NON-NLS-2$

@@ -63,7 +63,7 @@ public class HistoricalDailyReportDialog extends JDialog {
     private DailyReportLogPanel logPanel;
     private JButton closeBtn;
     private JLabel cacheInfoLabel;
-    private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("EEEE, MMMM d yyyy");
+    private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("EEEE, MMMM d yyyy");
 
     /**
      * HistoricalDailyReportDialog - opens a dialog that shows a history of the daily log

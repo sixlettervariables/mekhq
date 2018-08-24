@@ -29,6 +29,8 @@ import java.awt.GridLayout;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.ResourceBundle;
 
@@ -62,7 +64,7 @@ public class CustomizeScenarioDialog extends javax.swing.JDialog {
     private Campaign campaign;
     private boolean newScenario;
     private LocalDate date;
-    private DateTimeFormatter dateFormatter;
+    private static final DateTimeFormatter dateFormatter;
 
     private LootTableModel lootModel;
     
@@ -327,12 +329,7 @@ public class CustomizeScenarioDialog extends javax.swing.JDialog {
             		return;        			
         		} else {
         			//Calendar math necessitated by variations in locales
-        			LocalDate nextMonday = campaign.getDate().plusWeeks(1);
-        			while (nextMonday.getDayOfWeek() != DayOfWeek.MONDAY) {
-        				nextMonday = nextMonday.minusDays(
-                            nextMonday.getDayOfWeek().ordinal() - DayOfWeek.MONDAY.ordinal());
-        			}
-        			//
+        			LocalDate nextMonday = campaign.getDate().with(TemporalAdjusters.next(DayOfWeek.MONDAY));
         			if (!dc.getDate().isBefore(nextMonday)) {
                 		JOptionPane.showMessageDialog(frame,
                 			    "You cannot choose a date beyond the current week.",

@@ -41,7 +41,7 @@ import mekhq.campaign.mission.Contract;
 public class ContractViewPanel extends JPanel {
     private static final long serialVersionUID = 7004741688464105277L;
 
-    private DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+    private static final DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
     private Contract contract;
     

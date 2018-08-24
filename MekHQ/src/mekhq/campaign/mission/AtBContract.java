@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
+import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -928,11 +929,7 @@ public class AtBContract extends Contract implements Serializable {
          */
         if (null != specialEventScenarioDate
                 && !specialEventScenarioDate.isBefore(c.getDate())) {
-            LocalDate nextMonday = c.getDate().plusWeeks(1);
-            /* value of Calendar.MONDAY depends on locale */
-            if (nextMonday.getDayOfWeek() != DayOfWeek.MONDAY) {
-                nextMonday = nextMonday.minusDays(nextMonday.getDayOfWeek().ordinal() - DayOfWeek.MONDAY.ordinal());
-            }
+            LocalDate nextMonday = c.getDate().with(TemporalAdjusters.next(DayOfWeek.MONDAY));
             if (specialEventScenarioDate.isBefore(nextMonday)) {	
                 AtBScenario s = AtBScenarioFactory.createScenario(c, null,
                         specialEventScenarioType, false,

@@ -52,7 +52,7 @@ public class EditPersonnelLogDialog extends javax.swing.JDialog {
 
 	private static final long serialVersionUID = -8038099101234445018L;
 
-	private DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+	private static final DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
     private Frame frame;
     private Campaign campaign;
