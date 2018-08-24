@@ -29,7 +29,7 @@ public class PersonnelEventLogModel extends DataTableModel {
     public final static int COL_TEXT = 1;
 
     private ResourceBundle resourceMap;
-    private DateTimeFormatter shortDateFormat;
+    private static final DateTimeFormatter shortDateFormat;
     private final int dateTextWidth;
 
     public PersonnelEventLogModel() {

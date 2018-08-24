@@ -37,7 +37,7 @@ import mekhq.campaign.Kill;
 public class KillDialog extends javax.swing.JDialog {
     private static final long serialVersionUID = 2L;
     
-	private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MMMM d yyyy");
+	private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MMMM d yyyy");
 
     private Frame frame;
     private LocalDate date;

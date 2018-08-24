@@ -58,7 +58,7 @@ public class ContractSummaryPanel extends JPanel {
 	 */
 	private static final long serialVersionUID = 8773615661962644614L;
 
-	private DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+	private static final DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
 	private Campaign campaign;
 	private Contract contract;

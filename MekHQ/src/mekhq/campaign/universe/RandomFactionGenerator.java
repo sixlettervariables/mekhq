@@ -412,7 +412,7 @@ public class RandomFactionGenerator {
      */
     protected double adjustBorderWeight(double count, Faction f,
             Faction enemy, LocalDate date) {
-        final LocalDate TUKKAYID = LocalDate.of(3052, 5, 20);
+        final LocalDate TUKAYYID = LocalDate.of(3052, 5, 20);
 
         if (factionHints.isNeutral(f, enemy, currentDate())
                 || factionHints.isNeutral(enemy, f, currentDate())) {
@@ -423,7 +423,7 @@ public class RandomFactionGenerator {
         }
         if (f.isClan() && enemy.isClan() &&
                 (factionHints.isAlliedWith(f, enemy, date) ||
-                        (date.isBefore(TUKKAYID) && (borderTracker.getCenterY() < 600)))) {
+                        (date.isBefore(TUKAYYID) && (borderTracker.getCenterY() < 600)))) {
             /* Treat invading Clans as allies in the Inner Sphere */
             count /= 4.0;
         }

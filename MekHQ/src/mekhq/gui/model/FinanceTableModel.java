@@ -26,7 +26,7 @@ public class FinanceTableModel extends DataTableModel {
     public final static int COL_BALANCE  =   5;
     public final static int N_COL          = 6;
 
-    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
     public FinanceTableModel() {
         data = new ArrayList<Transaction>();

@@ -237,18 +237,17 @@ public final class FinancesTab extends CampaignGuiTab {
     private XYDataset setupFinanceDataset() {
     	TimeSeries s1 = new TimeSeries("C-Bills"); // NOI18N
     	ArrayList<Transaction> transactions = getCampaign().getFinances().getAllTransactions();
-    	LocalDate cal = null;
     	
     	long balance = 0;
     	for (int i = 0; i < transactions.size(); i++) {
     		balance += transactions.get(i).getAmount();
-    		cal = transactions.get(i).getDate();
+    		LocalDate date = transactions.get(i).getDate();
     		// since there may be more than one entry per day and the dataset for the graph can only have one entry per day
     		// we use addOrUpdate() which assumes transactions are in sequential order by date so we always have the most
             // up-to-date entry for each day
-    		s1.addOrUpdate(new Day(cal.getDayOfMonth(),
-    				cal.getMonth().ordinal()+1, // Gregorian and Julian calendars start at 0: https://docs.oracle.com/javase/7/docs/api/java/util/Calendar.html#MONTH
-    				cal.getYear()), 
+    		s1.addOrUpdate(new Day(date.getDayOfMonth(),
+    				date.getMonth().ordinal()+1, // Gregorian and Julian calendars start at 0: https://docs.oracle.com/javase/7/docs/api/java/util/Calendar.html#MONTH
+    				date.getYear()), 
     				balance);
     	}
                 
@@ -262,15 +261,14 @@ public final class FinancesTab extends CampaignGuiTab {
     	DateTimeFormatter df = DateTimeFormatter.ofPattern("MMM-yyyy");
     	DefaultCategoryDataset dataset = new DefaultCategoryDataset();
     	ArrayList<Transaction> transactions = getCampaign().getFinances().getAllTransactions();
-    	LocalDate cal = null;
-    	
+
     	String pastMonthYear = "";
     	long monthlyRevenue = 0;
     	long monthlyExpenditures = 0;
     	for (int i = 0; i < transactions.size(); i++) {
-    		cal = transactions.get(i).getDate();
+    		LocalDate date = transactions.get(i).getDate();
     		
-    		if (pastMonthYear.equals(df.format(cal))) {
+    		if (pastMonthYear.equals(df.format(date))) {
     			if (transactions.get(i).getAmount() > 0) {
     				monthlyRevenue += transactions.get(i).getAmount();
     			} else {
@@ -284,7 +282,7 @@ public final class FinancesTab extends CampaignGuiTab {
     				monthlyRevenue = 0;
     				monthlyExpenditures = 0;
     			}
-    			pastMonthYear = df.format(cal);
+    			pastMonthYear = df.format(date);
     			if (transactions.get(i).getAmount() > 0) {
     				monthlyRevenue = transactions.get(i).getAmount();
     			} else {

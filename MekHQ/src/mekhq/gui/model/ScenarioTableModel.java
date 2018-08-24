@@ -22,7 +22,7 @@ public class ScenarioTableModel extends DataTableModel {
     private final static int COL_ASSIGN     = 3;
     private final static int N_COL          = 4;
 
-    private DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+    private static final DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
     public ScenarioTableModel(Campaign c) {
         data = new ArrayList<Scenario>();

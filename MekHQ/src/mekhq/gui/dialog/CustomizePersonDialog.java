@@ -73,7 +73,7 @@ public class CustomizePersonDialog extends javax.swing.JDialog implements Dialog
     private PilotOptions options;
     private LocalDate birthdate;
     private LocalDate recruitment;
-    private DateTimeFormatter dateFormat;
+    private static final DateTimeFormatter dateFormat;
     private Frame frame;
     
     private javax.swing.JButton btnClose;
