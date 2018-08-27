@@ -276,8 +276,8 @@ public class Campaign implements Serializable, ITechManager {
 
     // calendar stuff
     public LocalDate calendar;
-    private static final DateTimeFormatter dateFormat;
-    private static final DateTimeFormatter shortDateFormat;
+    private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("EEEE, MMMM d yyyy");
+    private static final DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     private String factionCode;
     private int techFactionCode;
@@ -339,8 +339,6 @@ public class Campaign implements Serializable, ITechManager {
         currentReportHTML = "";
         newReports = new ArrayList<String>();
         calendar = LocalDate.of(3067, 1, 1);
-        dateFormat = DateTimeFormatter.ofPattern("EEEE, MMMM d yyyy");
-        shortDateFormat = DateTimeFormatter.ofPattern("yyyyMMdd");
         name = "My Campaign";
         rng = new RandomNameGenerator();
         rng.populateNames();
