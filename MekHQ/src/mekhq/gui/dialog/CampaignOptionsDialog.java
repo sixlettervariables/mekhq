@@ -124,7 +124,7 @@ public class CampaignOptionsDialog extends javax.swing.JDialog {
     private CampaignOptions options;
     private RandomSkillPreferences rskillPrefs;
     private LocalDate date;
-    private static final DateTimeFormatter dateFormat;
+    private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("EEEE, MMMM d yyyy");
     private Frame frame;
     private String camoCategory;
     private String camoFileName;
@@ -455,7 +455,6 @@ public class CampaignOptionsDialog extends javax.swing.JDialog {
         //this is a hack but I have no idea what is going on here
         this.frame = parent;
         this.date = campaign.calendar;
-        dateFormat = DateTimeFormatter.ofPattern("EEEE, MMMM d yyyy");
         this.camoCategory = campaign.getCamoCategory();
         this.camoFileName = campaign.getCamoFileName();
         this.colorIndex = campaign.getColorIndex();

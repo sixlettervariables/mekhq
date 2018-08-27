@@ -64,7 +64,7 @@ public class CustomizeScenarioDialog extends javax.swing.JDialog {
     private Campaign campaign;
     private boolean newScenario;
     private LocalDate date;
-    private static final DateTimeFormatter dateFormatter;
+    private static final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
 
     private LootTableModel lootModel;
     
@@ -106,7 +106,6 @@ public class CustomizeScenarioDialog extends javax.swing.JDialog {
         if(null == date) {
         	date = campaign.getDate();
         }
-        dateFormatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
         loots = new ArrayList<Loot>();
         for(Loot loot : scenario.getLoot()) {
             loots.add((Loot)loot.clone());
