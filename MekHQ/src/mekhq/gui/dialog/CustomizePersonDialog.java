@@ -73,7 +73,7 @@ public class CustomizePersonDialog extends javax.swing.JDialog implements Dialog
     private PilotOptions options;
     private LocalDate birthdate;
     private LocalDate recruitment;
-    private static final DateTimeFormatter dateFormat;
+    private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("MMMM d yyyy");
     private Frame frame;
     
     private javax.swing.JButton btnClose;
@@ -121,7 +121,6 @@ public class CustomizePersonDialog extends javax.swing.JDialog implements Dialog
         super(parent, modal);
         this.campaign = campaign;
         this.frame = parent;
-        this.dateFormat = DateTimeFormatter.ofPattern("MMMM d yyyy");
         this.person = person;
         initializePilotAndOptions();
         setLocationRelativeTo(parent);

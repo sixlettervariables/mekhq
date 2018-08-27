@@ -28,13 +28,11 @@ public class PersonnelEventLogModel extends DataTableModel {
     public final static int COL_DATE = 0;
     public final static int COL_TEXT = 1;
 
-    private ResourceBundle resourceMap;
-    private static final DateTimeFormatter shortDateFormat;
+    private static final ResourceBundle resourceMap = ResourceBundle.getBundle("mekhq.resources.PersonnelEventLogModel", new EncodeControl()); //$NON-NLS-1$;
+    private static final DateTimeFormatter shortDateFormat = DateTimeFormatter.ofPattern(resourceMap.getString("date.format")); //$NON-NLS-1$
     private final int dateTextWidth;
 
     public PersonnelEventLogModel() {
-        resourceMap = ResourceBundle.getBundle("mekhq.resources.PersonnelEventLogModel", new EncodeControl()); //$NON-NLS-1$
-        shortDateFormat = DateTimeFormatter.ofPattern(resourceMap.getString("date.format")); //$NON-NLS-1$
         data = new ArrayList<Kill>();
         dateTextWidth = getRenderer().metrics.stringWidth(shortDateFormat.format(LocalDate.now())) + 10;
     }
