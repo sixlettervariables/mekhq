@@ -84,12 +84,14 @@ import mekhq.campaign.parts.equipment.MissingAmmoBin;
 import mekhq.campaign.parts.equipment.MissingEquipmentPart;
 import mekhq.campaign.parts.refits.AddedPart;
 import mekhq.campaign.parts.refits.GenericUnitDiffer;
+import mekhq.campaign.parts.refits.IUnitDiffer;
 import mekhq.campaign.parts.refits.ModifiedPart;
 import mekhq.campaign.parts.refits.MovedPart;
 import mekhq.campaign.parts.refits.PartComparison;
 import mekhq.campaign.parts.refits.RemovedPart;
 import mekhq.campaign.parts.refits.UnchangedPart;
 import mekhq.campaign.parts.refits.UnitDiffResults;
+import mekhq.campaign.parts.refits.UnitDifferFactory;
 import mekhq.campaign.personnel.Person;
 import mekhq.campaign.personnel.SkillType;
 import mekhq.campaign.unit.Unit;
@@ -262,7 +264,7 @@ public class Refit extends Part implements IPartWork, IAcquisitionWork {
 		Unit newUnit = new Unit(newEntity, oldUnit.campaign);
 		newUnit.initializeParts(false);
 
-		GenericUnitDiffer differ = new GenericUnitDiffer();
+		IUnitDiffer differ = UnitDifferFactory.getInstance().create(oldUnit, newUnit);
 		UnitDiffResults results = differ.diff(oldUnit, newUnit);
 		if (!results.success()) {
 			fixableString = "A unit loses omni capabilities if any fixed equipment is modified";
