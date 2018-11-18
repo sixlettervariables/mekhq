@@ -264,7 +264,7 @@ public class Refit extends Part implements IPartWork, IAcquisitionWork {
 		Unit newUnit = new Unit(newEntity, oldUnit.campaign);
 		newUnit.initializeParts(false);
 
-		IUnitDiffer differ = UnitDifferFactory.getInstance().create(oldUnit, newUnit);
+		IUnitDiffer differ = new UnitDifferFactory().create(oldUnit, newUnit);
 		UnitDiffResults results = differ.diff(oldUnit, newUnit);
 		if (!results.success()) {
 			fixableString = "A unit loses omni capabilities if any fixed equipment is modified";
@@ -324,6 +324,7 @@ public class Refit extends Part implements IPartWork, IAcquisitionWork {
 					// Remove old armor from the location
 					int totalAmount = ((Armor)oPart).getTotalAmount();
 					time += totalAmount * ((Armor)oPart).getBaseTimeFor(newEntity);
+					continue;
 				} else if (oPart instanceof AmmoBin) {
 					// Unload the ammo bin
 					int remainingShots = ((AmmoBin)oPart).getFullShots() - ((AmmoBin)oPart).getShotsNeeded();
