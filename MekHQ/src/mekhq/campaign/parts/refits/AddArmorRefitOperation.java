@@ -1,7 +1,6 @@
 package mekhq.campaign.parts.refits;
 
 import mekhq.campaign.parts.Armor;
-import mekhq.campaign.parts.Refit;
 
 public class AddArmorRefitOperation extends AddPartRefitOperation {
     private Armor armor;

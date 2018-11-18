@@ -1,30 +1,27 @@
 package mekhq.campaign.parts.refits;
 
 import mekhq.campaign.parts.Armor;
-import mekhq.campaign.parts.Part;
 
 public class ModifyArmorRefitOperation extends ModifyPartRefitOperation {
-    private ModifiedPart comparison;
+    private Armor oldArmor;
+    private Armor newArmor;
 
     public ModifyArmorRefitOperation(ModifiedPart comparison) {
         super(comparison);
-        if (!(comparison.getNewPart().get() instanceof Armor)) {
-            // TODO: throw.
-        }
+        
+        oldArmor = (Armor)comparison.getOldPart().get();
+        newArmor = (Armor)comparison.getNewPart().get();
     }
 
     @Override
     public int getLocation() {
-        return comparison.getNewPart().map(Part::getLocation)
-            .orElse(super.getLocation());
+        return newArmor.getLocation();
     }
 
     @Override
     public int getTime() {
         // Only add the delta of the armor
-        Armor oPart = (Armor)comparison.getOldPart().get();
-        Armor nPart = (Armor)comparison.getNewPart().get();
-        int totalAmount = nPart.getTotalAmount() - oPart.getTotalAmount();
-        return totalAmount * nPart.getBaseTimeFor(comparison.getUnit().getEntity());
+        int totalAmount = newArmor.getTotalAmount() - oldArmor.getTotalAmount();
+        return totalAmount * newArmor.getBaseTimeFor(newArmor.getUnit().getEntity());
     }
 }

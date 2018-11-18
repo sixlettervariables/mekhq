@@ -40,31 +40,31 @@ public class RefitClassCalculator {
         int refitClass = Refit.NO_CHANGE;
 
         List<Part> removedParts = operations.stream()
-			.filter(op -> op instanceof RemovePartRefitOperation)
-			.map(op -> ((RemovePartRefitOperation)op).getPart())
-			.collect(Collectors.toList());
+            .filter(op -> op instanceof RemovePartRefitOperation)
+            .map(op -> ((RemovePartRefitOperation)op).getPart())
+            .collect(Collectors.toList());
 
         boolean isOmniRefit = calcIsOmniRefit(oldUnit, newUnit);
         for (RefitOperation op : operations) {
             if (op instanceof RemovePartRefitOperation) {
                 if (isOmniRefit) {
-					refitClass = max(refitClass, Refit.CLASS_OMNI);
-				} else {
-					refitClass = max(refitClass, Refit.CLASS_A);
-				}
+                    refitClass = max(refitClass, Refit.CLASS_OMNI);
+                } else {
+                    refitClass = max(refitClass, Refit.CLASS_A);
+                }
             } else if (op instanceof MovePartRefitOperation) {
                 if (isOmniRefit && ((MovePartRefitOperation)op).isOmniPodded()) {
-					refitClass = max(refitClass, Refit.CLASS_OMNI);
-				} else {
-					refitClass = max(refitClass, Refit.CLASS_C);
-				}
+                    refitClass = max(refitClass, Refit.CLASS_OMNI);
+                } else {
+                    refitClass = max(refitClass, Refit.CLASS_C);
+                }
             } else if (op instanceof AddPartRefitOperation) {
                 refitClass = max(refitClass, calculateAddPartClass(oldUnit, newUnit, isOmniRefit,
                     (AddPartRefitOperation)op, removedParts));
             }
         }
 
-		// check for squad size and number changes
+        // check for squad size and number changes
         if (oldUnit.getEntity() instanceof Infantry
             && !(oldUnit.getEntity() instanceof BattleArmor)) {
             refitClass = max(refitClass, calculateInfantryRefit(oldUnit, newUnit));
@@ -193,8 +193,8 @@ public class RefitClassCalculator {
         Entity oldEntity = oldUnit.getEntity();
         Entity newEntity = newUnit.getEntity();
         if(((Infantry)oldEntity).getSquadN() != ((Infantry)newEntity).getSquadN()
-			||((Infantry)oldEntity).getSquadSize() != ((Infantry)newEntity).getSquadSize()) {
-			return Refit.CLASS_A;
+            ||((Infantry)oldEntity).getSquadSize() != ((Infantry)newEntity).getSquadSize()) {
+            return Refit.CLASS_A;
         }
         
         return Refit.NO_CHANGE;
@@ -205,17 +205,17 @@ public class RefitClassCalculator {
         Entity newEntity = newUnit.getEntity();
         
         int refitClass = Refit.NO_CHANGE;
-		for(int loc = 0; loc < newEntity.locations(); loc++) {
-			if((newEntity.locationHasCase(loc) != oldEntity.locationHasCase(loc)
-					&& !(newEntity.isClan() && newEntity instanceof Mech))
-					|| (newEntity instanceof Mech
-							&& ((Mech)newEntity).hasCASEII(loc) != ((Mech)oldEntity).hasCASEII(loc))) {
-				if(isOmniRefit) {
-					refitClass = max(refitClass, Refit.CLASS_OMNI);
-				} else {
-					refitClass = max(refitClass, Refit.CLASS_E);
-				}
-			}
+        for(int loc = 0; loc < newEntity.locations(); loc++) {
+            if((newEntity.locationHasCase(loc) != oldEntity.locationHasCase(loc)
+                    && !(newEntity.isClan() && newEntity instanceof Mech))
+                    || (newEntity instanceof Mech
+                            && ((Mech)newEntity).hasCASEII(loc) != ((Mech)oldEntity).hasCASEII(loc))) {
+                if(isOmniRefit) {
+                    refitClass = max(refitClass, Refit.CLASS_OMNI);
+                } else {
+                    refitClass = max(refitClass, Refit.CLASS_E);
+                }
+            }
         }
 
         return refitClass;

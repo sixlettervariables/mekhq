@@ -3,8 +3,6 @@ package mekhq.campaign.parts.refits;
 import java.util.ArrayList;
 import java.util.List;
 
-import megamek.common.logging.LogLevel;
-import mekhq.MekHQ;
 import mekhq.campaign.parts.Armor;
 import mekhq.campaign.parts.MissingPart;
 import mekhq.campaign.parts.Part;
@@ -27,18 +25,6 @@ public class AddPartRefitOperation extends RefitOperation {
         Part nPart = part.getNewPart().get();
         if (nPart instanceof MissingPart) {
             return nPart.getBaseTime();
-        } else if (nPart instanceof Armor) {
-            // Totally new armor
-            int totalAmount = ((Armor)nPart).getTotalAmount();
-            return totalAmount * ((Armor)nPart).getBaseTimeFor(part.getUnit().getEntity());
-        } else if (nPart instanceof AmmoBin) {
-            if (nPart instanceof LargeCraftAmmoBin) {
-                // Adding ammo requires base 15 minutes per ton of ammo. Putting in a new
-                // capital missile bay can take weeks.
-                return (int)(15 * Math.max(1, nPart.getTonnage()));
-            } else {
-                return 120;
-            }
         }
 
         // We don't have a time for this (?)

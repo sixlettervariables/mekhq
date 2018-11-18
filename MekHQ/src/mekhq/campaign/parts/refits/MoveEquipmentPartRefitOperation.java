@@ -1,7 +1,5 @@
 package mekhq.campaign.parts.refits;
 
-import mekhq.campaign.parts.Part;
-import mekhq.campaign.parts.Refit;
 import mekhq.campaign.parts.equipment.EquipmentPart;
 
 public class MoveEquipmentPartRefitOperation extends MovePartRefitOperation {

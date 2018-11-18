@@ -14,9 +14,9 @@ public class MovePartRefitOperation extends RefitOperation {
             .orElse(super.getLocation());
     }
 
-	public boolean isOmniPodded() {
+    public boolean isOmniPodded() {
         return this.part.getNewPart()
             .map(p -> p.isOmniPodded())
             .orElse(false);
-	}
+    }
 }
