@@ -4,12 +4,15 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import megamek.common.Aero;
 import megamek.common.AmmoType;
+import megamek.common.Bay;
 import megamek.common.ConvFighter;
 import megamek.common.Entity;
 import megamek.common.EquipmentType;
@@ -48,7 +51,7 @@ public class GenericUnitDiffer implements IUnitDiffer {
 
         boolean isOmniRefit = oldUnit.getEntity().isOmni() && newUnit.getEntity().isOmni();
         if (isOmniRefit && !Utilities.isOmniVariant(oldUnit.getEntity(), newEntity)) {
-            return UnitDiffResults.failed();
+            return UnitDiffResults.failed(oldUnit, newUnit);
         }
         
         boolean sameArmorType = newEntity.getArmorType(0) == oldUnit.getEntity().getArmorType(0);
@@ -296,8 +299,43 @@ public class GenericUnitDiffer implements IUnitDiffer {
                 }
             }
         }
+
+        /*
+		 * Cargo and transport bays are essentially just open space and while it may take time and materials
+		 * to change the cubicles or the number of doors, the bay itself does not require any refit work
+		 * unless the size changes. First we create a list of all bays on each unit, then we attempt to
+		 * match them by size and number of doors. Any remaining are matched on size, and difference in
+		 * number of doors is noted as moving doors has to be accounted for in the time calculation.
+		 */
+        Map<Integer, TransportBayPart> oldBayParts = oldUnit.getParts().stream().filter(p -> p instanceof TransportBayPart)
+            .map(p -> (TransportBayPart)p)
+            .filter(p -> !p.getBay().isQuarters())
+            .collect(Collectors.toMap(p -> p.getBayNumber(), p -> p));
+        List<TransportBayPart> newBayParts = newUnit.getParts().stream().filter(p -> p instanceof TransportBayPart)
+            .map(p -> (TransportBayPart)p)
+            .filter(p -> !p.getBay().isQuarters())
+            .collect(Collectors.toList());
+        for (TransportBayPart newBayPart : newBayParts) {
+            TransportBayPart oldBayPart = oldBayParts.remove(newBayPart.getBayNumber());
+            if (null != oldBayPart) {
+                // Modified?
+                if (oldBayPart.getBay().getCapacity() != newBayPart.getBay().getCapacity()
+                    || oldBayPart.getBay().getDoors() != newBayPart.getBay().getDoors())
+                {
+                    comparisons.add(new ModifiedPart(newUnit, oldBayPart, newBayPart));
+                }
+            } else {
+                // Add.
+                comparisons.add(new AddedPart(newUnit, newBayPart));
+            }
+        }
+
+        // The bays left have been removed.
+        for (TransportBayPart oldBayPart : oldBayParts.values()) {
+            comparisons.add(new RemovedPart(newUnit, oldBayPart));
+        }
         
-        return new UnitDiffResults(comparisons);
+        return new UnitDiffResults(oldUnit, newUnit, comparisons);
     }
 
     private Optional<PartComparison> findMatchingArmor(List<PartComparison> comparisons, Armor existingArmor) {

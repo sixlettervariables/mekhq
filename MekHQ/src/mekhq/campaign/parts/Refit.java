@@ -271,6 +271,8 @@ public class Refit extends Part implements IPartWork, IAcquisitionWork {
 			return;
 		}
 
+		System.out.println(results.explain());
+
 		refitClass = NO_CHANGE;
 		boolean isOmniRefit = oldUnit.getEntity().isOmni() && newEntity.isOmni();
 
@@ -306,7 +308,6 @@ public class Refit extends Part implements IPartWork, IAcquisitionWork {
 
 				Part oPart = pc.getOldPart().get();
 				if ((oPart instanceof BattleArmorSuit)
-			        || (oPart instanceof TransportBayPart)
 			        || ((oPart instanceof EquipmentPart
 			                && ((EquipmentPart)oPart).getType() instanceof InfantryAttack))) {
 					continue;
@@ -333,6 +334,10 @@ public class Refit extends Part implements IPartWork, IAcquisitionWork {
 						ammoRemoved.merge((AmmoType)((AmmoBin)oPart).getType(), remainingShots,
 								(a, b) -> a + b);
 					}
+					continue;
+				} else if (oPart instanceof TransportBayPart) {
+					// Use bay replacement time of 1 month (30 days) for each bay to be resized
+					time += 14400;
 					continue;
 				}
 
@@ -426,6 +431,9 @@ public class Refit extends Part implements IPartWork, IAcquisitionWork {
 							shoppingList.add(nPart);
 						}
 					}
+				} else if (nPart instanceof TransportBayPart) {
+					// Use bay replacement time of 1 month (30 days) for each bay to be resized
+					time += 14400;
 				}
 
 				/*CHECK REFIT CLASS*/
@@ -542,17 +550,34 @@ public class Refit extends Part implements IPartWork, IAcquisitionWork {
 					}
 				}
 			} else if (pc instanceof ModifiedPart) {
-				// Only add the delta of the armor
-				Armor oPart = (Armor)pc.getOldPart().get();
-				Armor nPart = (Armor)pc.getNewPart().get();
-				int totalAmount = nPart.getTotalAmount() - oPart.getTotalAmount();
-				time += totalAmount * nPart.getBaseTimeFor(newEntity);
-				armorNeeded += totalAmount;
-				atype = nPart.getType();
-				aclan = nPart.isClanTechBase();
-				//armor always gets added to the shopping list - it will be checked for differently
-				//NOT ANYMORE - I think this is overkill, lets just reuse existing armor parts
-				//shoppingList.add(nPart);
+				if (pc.getOldPart().get() instanceof Armor) {
+					// Only add the delta of the armor
+					Armor oPart = (Armor)pc.getOldPart().get();
+					Armor nPart = (Armor)pc.getNewPart().get();
+					int totalAmount = nPart.getTotalAmount() - oPart.getTotalAmount();
+					time += totalAmount * nPart.getBaseTimeFor(newEntity);
+					armorNeeded += totalAmount;
+					atype = nPart.getType();
+					aclan = nPart.isClanTechBase();
+					//armor always gets added to the shopping list - it will be checked for differently
+					//NOT ANYMORE - I think this is overkill, lets just reuse existing armor parts
+					//shoppingList.add(nPart);
+				} else if (pc.getOldPart().get() instanceof TransportBayPart) {
+					TransportBayPart oldBayPart = (TransportBayPart)pc.getOldPart().get();
+					TransportBayPart newBayPart = (TransportBayPart)pc.getNewPart().get();
+					Bay oldBay = oldBayPart.getBay();
+					Bay newBay = newBayPart.getBay();
+
+					// Use bay replacement time of 1 month (30 days) for each bay to be resized
+					if (oldBay.getCapacity() != newBay.getCapacity()) {
+						time += 14400;
+					}
+
+					// 10 hours per door
+					if (oldBay.getDoors() != newBay.getDoors()) {
+						time += Math.abs(oldBay.getDoors() - newBay.getDoors()) * 600;
+					}
+				}
 			}
 		}
 		
@@ -563,7 +588,7 @@ public class Refit extends Part implements IPartWork, IAcquisitionWork {
 		 * match them by size and number of doors. Any remaining are matched on size, and difference in
 		 * number of doors is noted as moving doors has to be accounted for in the time calculation.
 		 */
-		List<Bay> oldUnitBays = oldUnit.getEntity().getTransportBays().stream()
+		/*List<Bay> oldUnitBays = oldUnit.getEntity().getTransportBays().stream()
 		        .filter(b -> !b.isQuarters()).collect(Collectors.toList());
 		List<Bay> newUnitBays = newEntity.getTransportBays().stream()
                 .filter(b -> !b.isQuarters()).collect(Collectors.toList());
@@ -613,7 +638,7 @@ public class Refit extends Part implements IPartWork, IAcquisitionWork {
                 doorsRemoved = Math.max(0, doorsRemoved + deltaDoors);
             }
             time += (doorsAdded + doorsRemoved) * 600;
-		}
+		}*/
 		
 		if (sameArmorType) {
 			//if this is the same armor type then we can recyle armor
@@ -721,7 +746,7 @@ public class Refit extends Part implements IPartWork, IAcquisitionWork {
 
             // The cost is equal to 10 percent of the units base value (not modified for quality).
             cost = (long) (oldUnit.getBuyCost() * .1);
-        }
+		}
 	}
 
 	public void begin() throws EntityLoadingException, IOException {
