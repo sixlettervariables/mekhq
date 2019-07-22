@@ -29,6 +29,7 @@ import mekhq.campaign.parts.Armor;
 import mekhq.campaign.parts.BattleArmorSuit;
 import mekhq.campaign.parts.MissingPart;
 import mekhq.campaign.parts.Part;
+import mekhq.campaign.parts.SpacecraftCoolingSystem;
 import mekhq.campaign.parts.TransportBayPart;
 import mekhq.campaign.parts.VeeStabiliser;
 import mekhq.campaign.parts.equipment.AmmoBin;
@@ -192,8 +193,8 @@ public class GenericUnitDiffer implements IUnitDiffer {
             } else {
                 //its a new part
                 //dont actually add the part iself but rather its missing equivalent
-                //except in the case of armor
-                if(part instanceof Armor || part instanceof AmmoBin) {
+                //except in the case of armor, ammobins and the spacecraft cooling system
+                if(part instanceof Armor || part instanceof AmmoBin || part instanceof SpacecraftCoolingSystem) {
                     comparisons.add(new AddedPart(newUnit, part));
                 } else {
                     MissingPart mPart = part.getMissingPart();
