@@ -1,5 +1,15 @@
-# This workflow will build a Java project with Gradle
-# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+#
+# Builds MekHQ for CI (and CD via artifacts)
+#
+# Jobs:
+#
+#    - ci_cd: Build MekHQ for CI/CD on Ubuntu with Java 1.8
+#        - This job will use MM and MML source directly
+#          for the build.
+#
+#    - other_os_ci: Build MekHQ on Windows and MacOS.
+#        - This job runs after `ci_cd` completes successfully.
+#
 
 name: MekHQ CI with Gradle
 
@@ -34,9 +44,20 @@ jobs:
     #
     # Find the repo and branch to use for MM
     #
+    # Output variables:
+    #
+    #    - mmRepo: The MM repository to use.
+    #    - mmBranch: The MM branch to use.
+    #
     - name: Find the Right MegaMek Branch
       id: find_mm
+      # Override bash so that it doesn't fail fast (the default)
+      # if we can't find the branch
       shell: bash {0}
+      # This shell script searches the PR submitter's MM repo for
+      # a branch that has the same name as the current PR branch.
+      # If found it sets the `mmRepo` and `mmBranch` step output variables
+      # to that branch.
       run: |
         git ls-remote --exit-code --heads ${{ github.event.pull_request.head.repo.owner.html_url }}/megamek.git ${{ github.event.pull_request.head.ref }}
         if [ "$?" == "0" ]
@@ -62,9 +83,20 @@ jobs:
     #
     # Find the repo and branch to use for MML
     #
+    # Output variables:
+    #
+    #    - mmlRepo: The MML repository to use.
+    #    - mmlBranch: The MML branch to use.
+    #
     - name: Find the Right MegaMekLab Branch
       id: find_mml
+      # Override bash so that it doesn't fail fast (the default)
+      # if we can't find the branch
       shell: bash {0}
+      # This shell script searches the PR submitter's MML repo for
+      # a branch that has the same name as the current PR branch.
+      # If found it sets the mmlRepo and mmlBranch step output variables
+      # to that branch.
       run: |
         git ls-remote --exit-code --heads ${{ github.event.pull_request.head.repo.owner.html_url }}/megameklab.git ${{ github.event.pull_request.head.ref }}
         if [ "$?" == "0" ]
@@ -158,7 +190,7 @@ jobs:
         
   #
   # Confirm on Windows and MacOS that we can still
-  # build and test MekHQ. This does use MegaMek or
+  # build and test MekHQ. This doesn't use MegaMek or
   # MegaMekLab's source and exercises the Maven Repo.
   #
   other_os_ci:
