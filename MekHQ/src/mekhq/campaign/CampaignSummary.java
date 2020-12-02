@@ -100,7 +100,7 @@ public class CampaignSummary {
         }
 
         //units
-        countDamageStatus = new int[Entity.DMG_CRIPPLED + 1];
+        countDamageStatus = new int[Entity.DMG_LEVELS];
         mechCount = 0;
         veeCount = 0;
         aeroCount = 0;
@@ -205,7 +205,8 @@ public class CampaignSummary {
         return countDamageStatus[Entity.DMG_LIGHT] + " light, " +
                 countDamageStatus[Entity.DMG_MODERATE] + " moderate, " +
                 countDamageStatus[Entity.DMG_HEAVY] + " heavy, " +
-                countDamageStatus[Entity.DMG_CRIPPLED] + " crippled";
+                countDamageStatus[Entity.DMG_CRIPPLED] + " crippled" +
+                ((countDamageStatus[Entity.DMG_UNMANNED] > 0) ? (", " + countDamageStatus[Entity.DMG_UNMANNED] + " unmanned") : "");
     }
 
     /**

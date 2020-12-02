@@ -183,6 +183,8 @@ public class Unit implements MekHqXmlSerializable, ITechnology {
                 return "Heavy Damage";
             case Entity.DMG_CRIPPLED:
                 return "Crippled";
+            case Entity.DMG_UNMANNED:
+                return "Unmanned";
             default:
                 return "Unknown";
         }
@@ -234,7 +236,12 @@ public class Unit implements MekHqXmlSerializable, ITechnology {
         } else if (!isFunctional()) {
             return "Inoperable";
         } else {
-            return getDamageStateName(getDamageState());
+            int damageState = getDamageState();
+            if ((damageState == Entity.DMG_NONE) && isUnmanned()) {
+                return "Unmanned";
+            }
+
+            return getDamageStateName(damageState);
         }
     }
 
@@ -1042,7 +1049,7 @@ public class Unit implements MekHqXmlSerializable, ITechnology {
     }
 
     public boolean isDamaged() {
-        return getDamageState() != Entity.DMG_NONE;
+        return getDamageState() > Entity.DMG_NONE;
     }
 
     public String getHeatSinkTypeString(int year) {
@@ -4954,13 +4961,12 @@ public class Unit implements MekHqXmlSerializable, ITechnology {
         lastMaintenanceReport = r;
     }
 
-
     public int getDamageState() {
-        return getDamageState(getEntity());
+        return getDamageState(false);
     }
 
-    public static int getDamageState(Entity en) {
-        return en.getDamageLevel(false);
+    public int getDamageState(boolean checkCrew) {
+        return getEntity().getDamageLevel(checkCrew);
     }
 
     public void resetParts() {

@@ -64,8 +64,10 @@ public class UnitStatusSorter implements Comparator<String>, Serializable {
             idx = 11;
         } else if (damageState.contains("Light")) {
             idx = 12;
-        } else if (damageState.contains("Undamaged")) {
+        } else if (damageState.contains("Unmanned")) {
             idx = 13;
+        } else if (damageState.contains("Undamaged")) {
+            idx = 100;
         }
 
         return idx;
