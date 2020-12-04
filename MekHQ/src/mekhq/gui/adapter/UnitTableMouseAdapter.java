@@ -20,14 +20,17 @@ package mekhq.gui.adapter;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 
@@ -1020,6 +1023,52 @@ public class UnitTableMouseAdapter extends MouseInputAdapter implements ActionLi
                     menuItem.setActionCommand(COMMAND_SELL);
                     menuItem.addActionListener(this);
                     popup.add(menuItem);
+                }
+
+                // Debug menu if holding CNTRL when right clicking
+                if ((e.getModifiersEx() & InputEvent.CTRL_DOWN_MASK) == InputEvent.CTRL_DOWN_MASK) {
+                    popup.addSeparator();
+                    menu = new JMenu("Debug");
+                    menuItem = new JMenuItem("Log Parts");
+                    menuItem.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            for (Unit u : units) {
+                                Set<Integer> seen = new HashSet<>();
+                                StringBuilder builder = new StringBuilder();
+                                builder.append(u.getName()).append(" (").append(u.getId()).append(")\n");
+                                for (Part p : u.getParts()) {
+                                    appendPart(builder, p, 0, seen);
+                                }
+                                MekHQ.getLogger().info(builder.toString());
+                            }
+                        }
+
+                        private StringBuilder indent(StringBuilder builder, int level) {
+                            while (level-- >= 0)
+                                builder.append("\t");
+                            return builder;
+                        }
+
+                        private void appendPart(StringBuilder builder, Part part, int level, Set<Integer> seen) {
+                            boolean recursion = !seen.add(part.getId());
+                            indent(builder, level).append(part.getId()).append(": ").append(part.getName());
+                            if (!part.getChildParts().isEmpty()) {
+                                builder.append("\n");
+                                for (Part c : part.getChildParts()) {
+                                    if (!recursion) {
+                                        appendPart(builder, c, level + 1, seen);
+                                    } else {
+                                        indent(builder, level + 1).append(c.getId()).append(": ").append(c.getName()).append("**").append("\n");
+                                    }
+                                }
+                            } else {
+                                builder.append("\n");
+                            }
+                        }
+                    });
+                    menu.add(menuItem);
+                    popup.add(menu);
                 }
 
                 //region GM Mode
