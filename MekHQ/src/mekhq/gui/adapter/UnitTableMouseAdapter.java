@@ -61,6 +61,8 @@ import mekhq.campaign.finances.Transaction;
 import mekhq.campaign.parts.Part;
 import mekhq.campaign.parts.Refit;
 import mekhq.campaign.parts.equipment.AmmoBin;
+import mekhq.campaign.parts.equipment.EquipmentPart;
+import mekhq.campaign.parts.equipment.MissingEquipmentPart;
 import mekhq.campaign.personnel.Person;
 import mekhq.campaign.personnel.SkillType;
 import mekhq.campaign.unit.Unit;
@@ -1052,19 +1054,53 @@ public class UnitTableMouseAdapter extends MouseInputAdapter implements ActionLi
 
                         private void appendPart(StringBuilder builder, Part part, int level, Set<Integer> seen) {
                             boolean recursion = !seen.add(part.getId());
-                            indent(builder, level).append(part.getId()).append(": ").append(part.getName());
+                            indent(builder, level).append(part.getId()).append(": ").append(getPartName(part));
                             if (!part.getChildParts().isEmpty()) {
                                 builder.append("\n");
                                 for (Part c : part.getChildParts()) {
                                     if (!recursion) {
                                         appendPart(builder, c, level + 1, seen);
                                     } else {
-                                        indent(builder, level + 1).append(c.getId()).append(": ").append(c.getName()).append("**").append("\n");
+                                        indent(builder, level + 1).append(c.getId()).append(": ").append(getPartName(c)).append("**").append("\n");
                                     }
                                 }
                             } else {
                                 builder.append("\n");
                             }
+                        }
+
+                        private String getPartName(Part part) {
+                            if (part instanceof EquipmentPart) {
+                                return String.format("%s (eq#%d; %s%s)", part.getName(), ((EquipmentPart) part).getEquipmentNum(),
+                                        ((EquipmentPart) part).getType().getName(), isEquipmentMissing(part) ? "; missing!" : "");
+                            } else if (part instanceof MissingEquipmentPart) {
+                                return String.format("%s (eq#%d; %s%s)", part.getName(), ((MissingEquipmentPart) part).getEquipmentNum(),
+                                        ((MissingEquipmentPart) part).getType().getName(), isEquipmentMissing(part) ? "; missing!" : "");
+                            } else {
+                                return part.getName();
+                            }
+                        }
+
+                        private boolean isEquipmentMissing(Part part) {
+                            if (part.getUnit() == null || part.getUnit().getEntity() == null) {
+                                return false;
+                            }
+
+                            EquipmentType type = null;
+                            int equipmentNum = -1;
+                            if (part instanceof EquipmentPart) {
+                                type = ((EquipmentPart) part).getType();
+                                equipmentNum = ((EquipmentPart) part).getEquipmentNum();
+                            } else if (part instanceof MissingEquipmentPart) {
+                                type = ((MissingEquipmentPart) part).getType();
+                                equipmentNum = ((MissingEquipmentPart) part).getEquipmentNum();
+                            } else {
+                                return false;
+                            }
+
+                            final Mounted mounted = part.getUnit().getEntity().getEquipment(equipmentNum);
+                            return mounted == null
+                                    || !mounted.getType().equals(type);
                         }
                     });
                     menu.add(menuItem);
